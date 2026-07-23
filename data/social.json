@@ -1,0 +1,30 @@
+[
+  {
+    "id": "452c731e-bfe4-4579-ad2b-f845b99bbb3f",
+    "type": "social",
+    "interactionType": "visit",
+    "name": "妈妈",
+    "arriveTime": "2026-07-23 14:00",
+    "leaveTime": "2026-07-23 18:00",
+    "needPickup": true,
+    "pickupLocation": "地铁站",
+    "status": "upcoming",
+    "notes": "带特产",
+    "date": "2026-07-23",
+    "createdAt": "2026-07-23T03:23:58.879Z"
+  },
+  {
+    "id": "40dcf439-51b2-446d-bbcf-bbcfff39ddb6",
+    "type": "social",
+    "interactionType": "visit",
+    "name": "爸爸",
+    "arriveTime": "2026-07-23 09:30",
+    "leaveTime": "2026-07-23 17:00",
+    "needPickup": true,
+    "pickupLocation": "地铁站",
+    "status": "upcoming",
+    "notes": "测试上班时段提醒",
+    "date": "2026-07-23",
+    "createdAt": "2026-07-23T03:23:59.285Z"
+  }
+]

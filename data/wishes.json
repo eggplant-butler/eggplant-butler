@@ -1,0 +1,16 @@
+[
+  {
+    "id": "7106bdca-59bf-40c4-9f51-717eb7561a7b",
+    "type": "wish",
+    "name": "买相机",
+    "targetAmount": 15000,
+    "currentAmount": 0,
+    "priority": "medium",
+    "category": "其他",
+    "deadline": "2026-12-31",
+    "description": "",
+    "tags": [],
+    "status": "active",
+    "createdAt": "2026-07-23T03:43:59.881Z"
+  }
+]

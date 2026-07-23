@@ -1,0 +1,84 @@
+[
+  {
+    "id": "85ce0a69-45b3-4329-afcc-1dd569a2f81c",
+    "name": "日支出超标提醒",
+    "description": "日支出超近7日1.5倍，晚8点提醒",
+    "condition": {
+      "type": "expense_exceed_avg",
+      "ratio": 1.5,
+      "days": 7
+    },
+    "action": {
+      "type": "notification",
+      "title": "支出超标",
+      "time": "20:00"
+    },
+    "enabled": true,
+    "builtin": true,
+    "createdAt": "2026-07-23T02:43:57.782Z"
+  },
+  {
+    "id": "36e3d588-a941-4450-ba51-b47c09921475",
+    "name": "连续无小确幸提醒",
+    "description": "连续3天无小确幸，推送鼓励",
+    "condition": {
+      "type": "no_joy_streak",
+      "days": 3
+    },
+    "action": {
+      "type": "notification",
+      "title": "小确幸提醒"
+    },
+    "enabled": true,
+    "builtin": true,
+    "createdAt": "2026-07-23T02:43:57.782Z"
+  },
+  {
+    "id": "98a2ca56-7963-496f-9b67-7b1574c46178",
+    "name": "客户48h未跟进提醒",
+    "description": "48h未跟进客户，加入提醒",
+    "condition": {
+      "type": "client_no_followup",
+      "hours": 48
+    },
+    "action": {
+      "type": "add_task",
+      "category": "工作"
+    },
+    "enabled": true,
+    "builtin": true,
+    "createdAt": "2026-07-23T02:43:57.782Z"
+  },
+  {
+    "id": "ff2426e0-0944-40f5-8387-2229a79b567f",
+    "name": "急躁互动深呼吸提醒",
+    "description": "家人互动带\"急躁\"标签后，下次来访前提醒",
+    "condition": {
+      "type": "impatient_interaction"
+    },
+    "action": {
+      "type": "notification",
+      "title": "深呼吸提醒"
+    },
+    "enabled": true,
+    "builtin": true,
+    "createdAt": "2026-07-23T02:43:57.782Z"
+  },
+  {
+    "id": "85b63539-3b12-476e-84ff-6b3156cd22d4",
+    "name": "出门迟到提醒",
+    "description": "连续两天未在07:50前完成出门打卡",
+    "condition": {
+      "type": "late_leave_streak",
+      "days": 2,
+      "deadline": "07:50"
+    },
+    "action": {
+      "type": "notification",
+      "title": "作息提醒"
+    },
+    "enabled": true,
+    "builtin": true,
+    "createdAt": "2026-07-23T02:43:57.782Z"
+  }
+]

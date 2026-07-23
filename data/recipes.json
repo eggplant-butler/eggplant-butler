@@ -1,0 +1,87 @@
+[
+  {
+    "id": "dd9351a0-11a1-4b03-a664-c1ea1365da09",
+    "type": "recipe",
+    "name": "番茄炒蛋",
+    "ingredients": [
+      {
+        "name": "番茄",
+        "amount": "",
+        "unit": ""
+      },
+      {
+        "name": "鸡蛋",
+        "amount": "",
+        "unit": ""
+      },
+      {
+        "name": "食用油",
+        "amount": "",
+        "unit": ""
+      },
+      {
+        "name": "盐",
+        "amount": "",
+        "unit": ""
+      }
+    ],
+    "cookTime": 15,
+    "difficulty": "easy",
+    "steps": [],
+    "tags": [
+      "家常菜"
+    ],
+    "notes": "",
+    "createdAt": "2026-07-23T03:24:18.237Z"
+  },
+  {
+    "id": "5404b2cc-d074-4ea8-9314-8895fb82160e",
+    "type": "recipe",
+    "name": "红烧肉",
+    "ingredients": [
+      {
+        "name": "五花肉",
+        "amount": "",
+        "unit": ""
+      },
+      {
+        "name": "冰糖",
+        "amount": "",
+        "unit": ""
+      },
+      {
+        "name": "生抽",
+        "amount": "",
+        "unit": ""
+      },
+      {
+        "name": "老抽",
+        "amount": "",
+        "unit": ""
+      },
+      {
+        "name": "料酒",
+        "amount": "",
+        "unit": ""
+      },
+      {
+        "name": "葱",
+        "amount": "",
+        "unit": ""
+      },
+      {
+        "name": "姜",
+        "amount": "",
+        "unit": ""
+      }
+    ],
+    "cookTime": 60,
+    "difficulty": "medium",
+    "steps": [],
+    "tags": [
+      "硬菜"
+    ],
+    "notes": "",
+    "createdAt": "2026-07-23T03:24:18.661Z"
+  }
+]

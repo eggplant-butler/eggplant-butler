@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍆 茄子管家 - 测试界面</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+    .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+    .header p { opacity: 0.9; }
+    .status-bar {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    .status-item {
+      text-align: center;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    .status-item .icon { font-size: 2em; margin-bottom: 5px; }
+    .status-item .value { font-size: 1.5em; font-weight: bold; color: #333; }
+    .status-item .label { color: #666; font-size: 0.9em; }
+    .modules {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+    }
+    .module-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .module-card:hover { transform: translateY(-2px); }
+    .module-card h3 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .module-card .icon { font-size: 1.5em; }
+    .module-card .desc {
+      color: #666;
+      font-size: 0.9em;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+    .module-card .endpoints {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .endpoint-tag {
+      background: #e9ecef;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.75em;
+      color: #495057;
+    }
+    .endpoint-tag.get { background: #d4edda; color: #155724; }
+    .endpoint-tag.post { background: #fff3cd; color: #856404; }
+    .test-btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 6px 12px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85em;
+      transition: background 0.2s;
+    }
+    .test-btn:hover { background: #5568d3; }
+    .result-box {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-size: 0.8em;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .result-box.show { display: block; }
+    .quick-actions {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .quick-actions h3 { margin-bottom: 15px; color: #333; }
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .action-btn {
+      padding: 10px 20px;
+      background: #764ba2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .action-btn:hover { background: #653d8e; }
+    .action-btn.green { background: #28a745; }
+    .action-btn.green:hover { background: #218838; }
+    .action-btn.orange { background: #fd7e14; }
+    .action-btn.orange:hover { background: #e5700d; }
+    footer {
+      text-align: center;
+      color: rgba(255,255,255,0.7);
+      margin-top: 30px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🍆 茄子管家</h1>
+      <p>个人生活管理后端服务 - API 测试界面</p>
+    </div>
+
+    <div class="status-bar" id="statusBar">
+      <div class="status-item">
+        <div class="icon">⚡</div>
+        <div class="value" id="serviceStatus">检查中...</div>
+        <div class="label">服务状态</div>
+      </div>
+      <div class="status-item">
+        <div class="icon">📊</div>
+        <div class="value" id="moduleCount">-</div>
+        <div class="label">功能模块</div>
+      </div>
+      <div class="status-item">
+        <div class="icon">💾</div>
+        <div class="value" id="dataCount">-</div>
+        <div class="label">数据文件</div>
+      </div>
+      <div class="status-item">
+        <div class="icon">📅</div>
+        <div class="value" id="currentDate">-</div>
+        <div class="label">当前日期</div>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <h3>🚀 快捷操作</h3>
+      <div class="action-buttons">
+        <button class="action-btn green" onclick="testHealth()">健康检查</button>
+        <button class="action-btn" onclick="testWeather()">获取今日天气</button>
+        <button class="action-btn" onclick="testSchedule()">生成今日日程</button>
+        <button class="action-btn orange" onclick="addExpense()">记一笔支出</button>
+        <button class="action-btn" onclick="testHabitStreak()">习惯统计</button>
+        <button class="action-btn" onclick="testJoy()">小确幸时间线</button>
+        <button class="action-btn" onclick="testTodayQuestion()">今日之问</button>
+        <button class="action-btn" onclick="checkRules()">执行规则检查</button>
+      </div>
+    </div>
+
+    <div class="modules" id="modules"></div>
+
+    <footer>
+      <p>🍆 Eggplant Butler v1.0.0 | 个人生活管理系统</p>
+    </footer>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+
+    // 模块列表
+    const modules = [
+      { name: '天气助手', icon: '🌤️', desc: '实时天气查询，降雨自动提醒带伞', endpoints: [['GET', '/weather/today']] },
+      { name: '动态日程', icon: '📅', desc: '智能生成每日时间轴，动态安排家务', endpoints: [['GET', '/schedule/today']] },
+      { name: '财务管理', icon: '💰', desc: '收支记录、分类预算、宠物开销分析', endpoints: [['POST', '/finance/expense'], ['GET', '/finance/summary'], ['GET', '/finance/budget']] },
+      { name: '习惯打卡', icon: '✅', desc: '早起/健身/睡觉打卡，连续天数统计', endpoints: [['POST', '/habit/checkin'], ['GET', '/habit/streak'], ['GET', '/habit/today']] },
+      { name: '健康管理', icon: '💪', desc: '饮水、经期、如厕记录与提醒', endpoints: [['POST', '/health/water'], ['GET', '/health/water/today'], ['GET', '/health/period/predict']] },
+      { name: '宠物护理', icon: '🐱', desc: '驱虫/疫苗/洗澡提醒，紧急症状建议', endpoints: [['POST', '/pet/event'], ['GET', '/pet/reminder'], ['POST', '/pet/emergency']] },
+      { name: '家务引擎', icon: '🧹', desc: '忙闲模式切换，智能计算家务周期', endpoints: [['GET', '/chores/due'], ['POST', '/chores/set-mode']] },
+      { name: '库存买菜', icon: '🛒', desc: '物品库存管理，自动生成购物清单', endpoints: [['GET', '/inventory/items'], ['GET', '/inventory/shopping-list'], ['GET', '/inventory/fridge']] },
+      { name: '社交人脉', icon: '👥', desc: '人脉管理、生日提醒、互动时间线', endpoints: [['POST', '/social/contact'], ['GET', '/social/upcoming-birthdays']] },
+      { name: '工作引擎', icon: '💼', desc: '销售/家教/面试多模式切换', endpoints: [['GET', '/work/mode'], ['POST', '/work/mode'], ['GET', '/work/daily-review']] },
+      { name: '摄影学习', icon: '📷', desc: '摄影日志、复盘记录、技能趋势', endpoints: [['POST', '/photo/log'], ['GET', '/photo/progress']] },
+      { name: '阅读模块', icon: '📚', desc: '阅读记录、连续天数、阅读提醒', endpoints: [['POST', '/reading/log'], ['GET', '/reading/stats']] },
+      { name: '愿望清单', icon: '🎯', desc: '储蓄目标、进度追踪、预计达成日期', endpoints: [['POST', '/wish'], ['GET', '/wish/status']] },
+      { name: '成就小确幸', icon: '🎉', desc: '记录小确幸，自动生成成就', endpoints: [['POST', '/joy/joy'], ['POST', '/joy/win'], ['GET', '/joy/timeline']] },
+      { name: '闪念笔记', icon: '📝', desc: '快速记录，AI智能分类建议', endpoints: [['POST', '/inbox'], ['GET', '/inbox/unprocessed']] },
+      { name: '今日之问', icon: '❓', desc: '基于昨日数据动态生成反思问题', endpoints: [['GET', '/today-question']] },
+      { name: '管理员中心', icon: '⚙️', desc: '模块开关、跨模块规则、系统概览', endpoints: [['GET', '/admin/skills'], ['GET', '/admin/overview']] }
+    ];
+
+    // 初始化
+    async function init() {
+      // 日期
+      const now = new Date();
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN');
+
+      // 渲染模块
+      const modulesEl = document.getElementById('modules');
+      modules.forEach((mod, idx) => {
+        const card = document.createElement('div');
+        card.className = 'module-card';
+        card.innerHTML = `
+          <h3><span class="icon">${mod.icon}</span> ${mod.name}</h3>
+          <p class="desc">${mod.desc}</p>
+          <div class="endpoints">
+            ${mod.endpoints.map(([method, path]) =>
+              `<span class="endpoint-tag ${method.toLowerCase()}">${method} ${path}</span>`
+            ).join('')}
+          </div>
+          <button class="test-btn" onclick="testModule(${idx})">测试</button>
+          <div class="result-box" id="result-${idx}"></div>
+        `;
+        modulesEl.appendChild(card);
+      });
+
+      // 健康检查
+      testHealth();
+    }
+
+    async function apiCall(path, method = 'GET', body = null) {
+      const options = { method, headers: { 'Content-Type': 'application/json' } };
+      if (body) options.body = JSON.stringify(body);
+      try {
+        const res = await fetch(API_BASE + path, options);
+        return await res.json();
+      } catch (e) {
+        return { success: false, message: e.message };
+      }
+    }
+
+    function showResult(idx, data) {
+      const box = document.getElementById(`result-${idx}`);
+      box.textContent = JSON.stringify(data, null, 2);
+      box.classList.add('show');
+    }
+
+    async function testModule(idx) {
+      const mod = modules[idx];
+      const firstEndpoint = mod.endpoints[0];
+      const method = firstEndpoint[0];
+      const path = firstEndpoint[1];
+      const result = await apiCall(path, method);
+      showResult(idx, result);
+    }
+
+    async function testHealth() {
+      const result = await apiCall('/health');
+      if (result.success) {
+        document.getElementById('serviceStatus').innerHTML = '<span style="color: #28a745">运行中</span>';
+        document.getElementById('moduleCount').textContent = modules.length + '个';
+      } else {
+        document.getElementById('serviceStatus').innerHTML = '<span style="color: #dc3545">异常</span>';
+      }
+    }
+
+    async function testWeather() {
+      const idx = 0;
+      const result = await apiCall('/weather/today');
+      showResult(idx, result);
+    }
+
+    async function testSchedule() {
+      const idx = 1;
+      const result = await apiCall('/schedule/today?mode=auto');
+      showResult(idx, result);
+    }
+
+    async function addExpense() {
+      const rawText = prompt('输入支出（如"午餐25餐饮微信"）:', '奶茶18餐饮微信');
+      if (!rawText) return;
+      const result = await apiCall('/finance/expense', 'POST', { rawText });
+      alert(result.success ? `✅ 记录成功：${result.data.title} ¥${result.data.amount}` : '❌ ' + result.message);
+      testHealth();
+    }
+
+    async function testHabitStreak() {
+      const idx = 3;
+      const result = await apiCall('/habit/streak');
+      showResult(idx, result);
+    }
+
+    async function testJoy() {
+      const idx = 13;
+      const result = await apiCall('/joy/timeline');
+      showResult(idx, result);
+    }
+
+    async function testTodayQuestion() {
+      const idx = 15;
+      const result = await apiCall('/today-question');
+      showResult(idx, result);
+      if (result.success && result.data.question) {
+        setTimeout(() => {
+          alert(`❓ 今日之问\n\n${result.data.question.text}\n\n分类：${result.data.category}`);
+        }, 300);
+      }
+    }
+
+    async function checkRules() {
+      const result = await apiCall('/admin/rules/check', 'POST', {});
+      alert(result.success
+        ? `✅ 规则检查完成\n触发 ${result.data.triggered.length} 条规则`
+        : '❌ ' + result.message);
+    }
+
+    // 初始化
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+[
+  {
+    "id": "3b7fc984-dd0a-40fb-b44e-7269a8cde5d3",
+    "type": "finance_template",
+    "name": "公交",
+    "rawText": "公交2交通z",
+    "title": "",
+    "amount": 0,
+    "category": "其他",
+    "paymentMethod": "",
+    "tags": [],
+    "icon": "🚌",
+    "usageCount": 1,
+    "createdAt": "2026-07-23T03:42:42.091Z",
+    "lastUsedAt": "2026-07-23T03:42:54.629Z"
+  },
+  {
+    "id": "6259d8cf-9589-4a71-8c22-44c693c8d358",
+    "type": "finance_template",
+    "name": "午餐",
+    "rawText": "午餐18餐饮w",
+    "title": "",
+    "amount": 0,
+    "category": "其他",
+    "paymentMethod": "",
+    "tags": [],
+    "icon": "🍱",
+    "usageCount": 0,
+    "createdAt": "2026-07-23T03:42:44.387Z"
+  }
+]

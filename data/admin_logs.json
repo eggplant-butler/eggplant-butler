@@ -1,0 +1,18 @@
+[
+  {
+    "id": "30b03802-1938-4e69-abda-f5cbf3848133",
+    "type": "admin_log",
+    "method": "POST",
+    "path": "/finance/expense",
+    "module": "finance",
+    "summary": "POST /finance/expense",
+    "ip": "::ffff:127.0.0.1",
+    "userAgent": "curl/7.81.0",
+    "body": {
+      "rawText": "测试日志咖啡15"
+    },
+    "date": "2026-07-23",
+    "time": "04:03:23",
+    "createdAt": "2026-07-23T04:03:23.654Z"
+  }
+]

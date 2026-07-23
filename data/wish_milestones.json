@@ -1,0 +1,29 @@
+[
+  {
+    "id": "bb3615ed-f271-400c-a5ca-6edcc1a627de",
+    "type": "wish_milestone",
+    "wishId": "7106bdca-59bf-40c4-9f51-717eb7561a7b",
+    "title": "存够1万",
+    "description": "",
+    "targetAmount": 10000,
+    "condition": "",
+    "status": "completed",
+    "order": 1,
+    "completedAt": "2026-07-23T03:46:52.042Z",
+    "createdAt": "2026-07-23T03:44:07.621Z",
+    "updatedAt": "2026-07-23T03:46:52.042Z"
+  },
+  {
+    "id": "04a06d50-e708-45dc-865f-b78667bbd081",
+    "type": "wish_milestone",
+    "wishId": "7106bdca-59bf-40c4-9f51-717eb7561a7b",
+    "title": "选定车型",
+    "description": "",
+    "targetAmount": 0,
+    "condition": "完成调研并确定品牌和型号",
+    "status": "pending",
+    "order": 2,
+    "completedAt": null,
+    "createdAt": "2026-07-23T03:44:10.680Z"
+  }
+]

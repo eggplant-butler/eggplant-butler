@@ -1,0 +1,2414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#7c3aed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="茄子管家">
+<meta name="application-name" content="茄子管家">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="msapplication-TileColor" content="#7c3aed">
+<meta name="msapplication-starturl" content="/">
+<link rel="manifest" href="/public/manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='38' fill='%237c3aed'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='central' text-anchor='middle' font-size='100'%3E%F0%9F%8D%86%3C/text%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<title>🍆 茄子管家 - 个人工作台</title>
+<style>
+  /* ===== CSS Variables ===== */
+  :root {
+    --purple-50: #f3e8ff;
+    --purple-100: #e9d5ff;
+    --purple-200: #d8b4fe;
+    --purple-300: #c084fc;
+    --purple-400: #a855f7;
+    --purple-500: #9333ea;
+    --purple-600: #7c3aed;
+    --purple-700: #6b21a8;
+    --purple-800: #581c87;
+    --purple-900: #3b0764;
+    --purple-gradient: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%);
+    --purple-gradient-reverse: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #7c3aed 100%);
+    --bg-primary: #0f0717;
+    --bg-secondary: #1a1028;
+    --bg-card: #24163a;
+    --bg-card-hover: #2d1a48;
+    --text-primary: #f5f3ff;
+    --text-secondary: #c4b5fd;
+    --text-muted: #8b7aaa;
+    --border-color: #3b2060;
+    --shadow-sm: 0 2px 8px rgba(124, 58, 237, 0.15);
+    --shadow-md: 0 4px 16px rgba(124, 58, 237, 0.25);
+    --shadow-lg: 0 8px 32px rgba(124, 58, 237, 0.35);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-family);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+  a { color: var(--purple-400); text-decoration: none; }
+  a:hover { color: var(--purple-300); }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+  ::-webkit-scrollbar-thumb { background: var(--purple-700); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--purple-600); }
+
+  /* ===== Password Modal ===== */
+  .password-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg-primary);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+  .password-overlay.hidden { display: none; }
+  .password-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 48px 40px;
+    width: 400px; max-width: 90vw;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+  .password-box .icon {
+    font-size: 64px; margin-bottom: 16px;
+  }
+  .password-box h2 {
+    font-size: 24px; font-weight: 700;
+    background: var(--purple-gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .password-box p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .password-box .input-group {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .password-box input {
+    width: 100%; padding: 14px 18px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 16px; font-family: var(--font-family);
+    outline: none;
+    transition: var(--transition);
+  }
+  .password-box input:focus {
+    border-color: var(--purple-400);
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+  }
+  .password-box input::placeholder { color: var(--text-muted); }
+  .password-box .error-msg {
+    color: #f87171;
+    font-size: 13px;
+    min-height: 20px;
+  }
+  .password-box button {
+    width: 100%; padding: 14px;
+    border: none; border-radius: var(--radius-md);
+    background: var(--purple-gradient);
+    color: #fff;
+    font-size: 16px; font-weight: 600;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .password-box button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .password-box button:active { transform: translateY(0); }
+
+  /* ===== Layout ===== */
+  .app-container { display: none; }
+  .app-container.visible { display: block; }
+
+  /* ===== Top Navbar ===== */
+  .navbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(15, 7, 23, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 24px;
+  }
+  .navbar-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .navbar-title {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 20px; font-weight: 700;
+    background: var(--purple-gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .navbar-title .logo-text { font-size: 24px; }
+  .navbar-right {
+    display: flex; align-items: center; gap: 16px;
+  }
+  .navbar-date {
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+  .navbar-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 13px; font-family: var(--font-family);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .navbar-btn:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+    border-color: var(--purple-400);
+  }
+
+  /* ===== Main Content ===== */
+  .main-content {
+    max-width: 1400px; margin: 0 auto;
+    padding: 24px;
+  }
+
+  /* ===== Grid Layout ===== */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+
+  /* ===== Card ===== */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--purple-gradient);
+    opacity: 0;
+    transition: var(--transition);
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--purple-600);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .card:hover::before { opacity: 1; }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 16px; font-weight: 600;
+    color: var(--text-primary);
+  }
+  .card-title .emoji { font-size: 20px; }
+  .card-body { position: relative; }
+  .card-body .empty-state {
+    text-align: center; padding: 20px 0;
+    color: var(--text-muted); font-size: 14px;
+  }
+  .card-body .loading-state {
+    text-align: center; padding: 20px 0;
+    color: var(--text-muted);
+  }
+  .card-body .loading-state::after {
+    content: ''; display: inline-block;
+    width: 20px; height: 20px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--purple-400);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 8px; vertical-align: middle;
+  }
+
+  /* Card sizes */
+  .card-colspan-1 { grid-column: span 1; }
+  .card-colspan-2 { grid-column: span 2; }
+  .card-colspan-3 { grid-column: span 3; }
+  .card-colspan-4 { grid-column: span 4; }
+
+  .card-rowspan-2 { grid-row: span 2; }
+
+  /* ===== Test Button ===== */
+  .test-btn {
+    padding: 4px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px; font-family: var(--font-family);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .test-btn:hover {
+    background: var(--purple-700);
+    color: #fff;
+    border-color: var(--purple-500);
+  }
+  .test-result {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-secondary);
+    max-height: 160px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    display: none;
+  }
+  .test-result.visible { display: block; }
+  .test-result.error { color: #f87171; border-color: rgba(248,113,113,0.3); }
+  .test-result.success { color: #86efac; border-color: rgba(134,239,172,0.3); }
+
+  /* ===== Overview Card ===== */
+  .overview-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  }
+  .overview-stat {
+    text-align: center;
+    padding: 12px 8px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+  }
+  .overview-stat .value {
+    font-size: 24px; font-weight: 700;
+    background: var(--purple-gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .overview-stat .label {
+    font-size: 12px; color: var(--text-muted); margin-top: 4px;
+  }
+  .weather-info {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+  }
+  .weather-info .weather-icon { font-size: 36px; }
+  .weather-info .weather-detail { flex: 1; }
+  .weather-info .weather-temp { font-size: 20px; font-weight: 700; }
+  .weather-info .weather-desc { font-size: 13px; color: var(--text-muted); }
+
+  /* ===== Finance ===== */
+  .finance-summary {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 12px;
+  }
+  .finance-item {
+    text-align: center;
+    padding: 10px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+  }
+  .finance-item .amount {
+    font-size: 20px; font-weight: 700;
+    color: var(--purple-300);
+  }
+  .finance-item .label {
+    font-size: 12px; color: var(--text-muted); margin-top: 2px;
+  }
+  .budget-bar {
+    margin-top: 8px;
+  }
+  .budget-bar .bar-label {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--text-muted); margin-bottom: 4px;
+  }
+  .budget-bar .bar-track {
+    height: 8px; background: var(--bg-secondary);
+    border-radius: 4px; overflow: hidden;
+  }
+  .budget-bar .bar-fill {
+    height: 100%; border-radius: 4px;
+    background: var(--purple-gradient);
+    transition: width 0.8s ease;
+  }
+  .budget-bar .bar-fill.warning { background: linear-gradient(135deg, #f59e0b, #f97316); }
+  .budget-bar .bar-fill.danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+  /* ===== Habit ===== */
+  .habit-list { display: flex; flex-direction: column; gap: 10px; }
+  .habit-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+  }
+  .habit-item:hover { background: #2d1a48; }
+  .habit-item .habit-icon { font-size: 24px; }
+  .habit-item .habit-info { flex: 1; }
+  .habit-item .habit-name { font-size: 14px; font-weight: 500; }
+  .habit-item .habit-streak { font-size: 12px; color: var(--text-muted); }
+  .habit-item .habit-status {
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+  }
+  .habit-status.done { background: rgba(134,239,172,0.15); color: #86efac; }
+  .habit-status.pending { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .habit-status.missed { background: rgba(248,113,113,0.15); color: #f87171; }
+
+  /* ===== News ===== */
+  .news-category { margin-bottom: 14px; }
+  .news-category:last-child { margin-bottom: 0; }
+  .news-category-title {
+    font-size: 13px; font-weight: 600; color: var(--purple-300);
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .news-item {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(59, 32, 96, 0.5);
+  }
+  .news-item:last-child { border-bottom: none; }
+  .news-item .news-title {
+    font-size: 13px; color: var(--text-primary);
+    margin-bottom: 2px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .news-item .news-source {
+    font-size: 11px; color: var(--text-muted);
+  }
+
+  /* ===== Quick Actions ===== */
+  .quick-actions {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  }
+  .quick-action-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 16px 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-family);
+    color: var(--text-secondary);
+  }
+  .quick-action-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--purple-500);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+    color: var(--text-primary);
+  }
+  .quick-action-btn .qa-icon { font-size: 28px; }
+  .quick-action-btn .qa-label { font-size: 12px; }
+
+  /* ===== Schedule ===== */
+  .schedule-list { display: flex; flex-direction: column; gap: 8px; }
+  .schedule-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+  }
+  .schedule-item .schedule-time {
+    font-size: 12px; color: var(--purple-400);
+    white-space: nowrap; font-weight: 600;
+    min-width: 48px;
+  }
+  .schedule-item .schedule-info { flex: 1; }
+  .schedule-item .schedule-title {
+    font-size: 13px; color: var(--text-primary);
+  }
+  .schedule-item .schedule-desc {
+    font-size: 12px; color: var(--text-muted);
+  }
+
+  /* ===== Pet ===== */
+  .pet-list { display: flex; flex-direction: column; gap: 10px; }
+  .pet-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+  }
+  .pet-item .pet-icon { font-size: 28px; }
+  .pet-item .pet-info { flex: 1; }
+  .pet-item .pet-name { font-size: 14px; font-weight: 500; }
+  .pet-item .pet-task { font-size: 12px; color: var(--text-muted); }
+  .pet-item .pet-urgent {
+    font-size: 11px; padding: 2px 8px; border-radius: 10px;
+    background: rgba(248,113,113,0.15); color: #f87171;
+  }
+  .pet-item .pet-ok {
+    font-size: 11px; padding: 2px 8px; border-radius: 10px;
+    background: rgba(134,239,172,0.15); color: #86efac;
+  }
+
+  /* ===== Shopping List ===== */
+  .shopping-list { display: flex; flex-direction: column; gap: 6px; }
+  .shopping-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+  }
+  .shopping-item .shopping-name { flex: 1; font-size: 13px; }
+  .shopping-item .shopping-qty {
+    font-size: 12px; color: var(--text-muted);
+  }
+  .shopping-item .shopping-priority {
+    font-size: 11px; padding: 2px 8px; border-radius: 10px;
+  }
+  .shopping-priority.high { background: rgba(248,113,113,0.15); color: #f87171; }
+  .shopping-priority.medium { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .shopping-priority.low { background: rgba(134,239,172,0.15); color: #86efac; }
+
+  /* ===== Work Review ===== */
+  .review-content { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+  .review-content .review-section {
+    padding: 10px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+  }
+  .review-content .review-section:last-child { margin-bottom: 0; }
+  .review-section .rs-label {
+    font-size: 12px; font-weight: 600; color: var(--purple-300);
+    margin-bottom: 4px;
+  }
+
+  /* ===== Reading Stats ===== */
+  .reading-stats {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+  }
+  .reading-stat {
+    text-align: center;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+  }
+  .reading-stat .rs-value {
+    font-size: 22px; font-weight: 700;
+    color: var(--purple-300);
+  }
+  .reading-stat .rs-label {
+    font-size: 12px; color: var(--text-muted); margin-top: 2px;
+  }
+
+  /* ===== Today Question ===== */
+  .question-box {
+    padding: 16px;
+    background: var(--purple-gradient);
+    border-radius: var(--radius-md);
+    text-align: center;
+  }
+  .question-box .question-text {
+    font-size: 16px; font-weight: 600; color: #fff;
+    margin-bottom: 8px;
+  }
+  .question-box .question-hint {
+    font-size: 13px; color: rgba(255,255,255,0.7);
+  }
+
+  /* ===== Animation ===== */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card { animation: fadeIn 0.4s ease forwards; }
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.1s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.2s; }
+  .card:nth-child(5) { animation-delay: 0.25s; }
+  .card:nth-child(6) { animation-delay: 0.3s; }
+  .card:nth-child(7) { animation-delay: 0.35s; }
+  .card:nth-child(8) { animation-delay: 0.4s; }
+  .card:nth-child(9) { animation-delay: 0.45s; }
+  .card:nth-child(10) { animation-delay: 0.5s; }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 1200px) {
+    .dashboard-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 900px) {
+    .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+    .card-colspan-2, .card-colspan-3, .card-colspan-4 { grid-column: span 1; }
+    .navbar-inner { height: 56px; }
+    .navbar-title { font-size: 17px; }
+    .navbar-date { font-size: 12px; }
+    .main-content { padding: 16px; }
+  }
+  @media (max-width: 600px) {
+    .dashboard-grid { grid-template-columns: 1fr; gap: 14px; }
+    .navbar-inner { height: 52px; padding: 0 12px; }
+    .navbar-title { font-size: 15px; gap: 6px; }
+    .navbar-date { display: none; }
+    .navbar-btn { padding: 6px 12px; font-size: 12px; }
+    .main-content { padding: 12px; }
+    .card { padding: 14px; }
+    .overview-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .finance-summary { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .quick-actions { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .password-box { padding: 32px 24px; }
+    .password-box .icon { font-size: 48px; }
+    .password-box h2 { font-size: 20px; }
+  }
+
+  /* ===== Chart Containers ===== */
+  .chart-container {
+    position: relative;
+    width: 100%;
+  }
+
+  /* ===== FAB Quick Expense ===== */
+  .fab-quick-expense {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--purple-gradient);
+    color: #fff;
+    font-size: 24px;
+    border: none;
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+  .fab-quick-expense:hover {
+    transform: scale(1.08);
+    box-shadow: var(--shadow-lg);
+  }
+  .fab-quick-expense:active { transform: scale(0.96); }
+
+  /* ===== Modal ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9990;
+    background: rgba(15, 7, 23, 0.85);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    width: 480px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: fadeIn 0.25s ease;
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  .modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--text-primary); }
+  .modal-body { padding: 16px 20px; }
+  .modal-divider {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 14px 0;
+    position: relative;
+  }
+  .modal-divider::before,
+  .modal-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 40px);
+    height: 1px;
+    background: var(--border-color);
+  }
+  .modal-divider::before { left: 0; }
+  .modal-divider::after { right: 0; }
+  .modal-input-group {
+    display: flex;
+    gap: 8px;
+  }
+  .modal-input-group input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: var(--font-family);
+    outline: none;
+  }
+  .modal-input-group input:focus {
+    border-color: var(--purple-400);
+  }
+  .modal-input-group button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--purple-gradient);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-family);
+  }
+  .modal-tips {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  /* ===== Template Grid ===== */
+  .template-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .template-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    font-size: 13px;
+  }
+  .template-btn:hover {
+    border-color: var(--purple-500);
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+  }
+  .template-btn .tpl-icon { font-size: 22px; }
+  .template-btn .tpl-name { font-weight: 500; }
+  .template-btn .tpl-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* ===== PWA Install Prompt ===== */
+  .pwa-install-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-color);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    z-index: 8888;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+  }
+  .pwa-install-bar.show { transform: translateY(0); }
+  .pwa-install-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+  .pwa-install-icon {
+    width: 48px; height: 48px;
+    background: var(--purple-gradient);
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+  .pwa-install-text {
+    min-width: 0;
+  }
+  .pwa-install-text h4 {
+    font-size: 15px; font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pwa-install-text p {
+    font-size: 12px; color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pwa-install-actions {
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .pwa-install-btn {
+    background: var(--purple-gradient);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+  }
+  .pwa-install-btn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+  }
+  .pwa-install-close {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .pwa-install-close:hover { color: var(--text-primary); }
+
+  @media (max-width: 480px) {
+    .pwa-install-bar { padding: 10px 14px; }
+    .pwa-install-icon { width: 40px; height: 40px; font-size: 22px; }
+    .pwa-install-btn { padding: 8px 14px; font-size: 13px; }
+    .pwa-install-text h4 { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Password Modal ===== -->
+<div class="password-overlay" id="passwordOverlay">
+  <div class="password-box">
+    <div class="icon">🍆</div>
+    <h2>茄子管家</h2>
+    <p>请输入访问密码以进入工作台</p>
+    <div class="input-group">
+      <input type="password" id="passwordInput" placeholder="请输入密码" autocomplete="off" />
+      <div class="error-msg" id="passwordError"></div>
+      <button id="passwordSubmitBtn">确认进入</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== App Container ===== -->
+<div class="app-container" id="appContainer">
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-title">
+        <span class="logo-text">🍆</span>
+        <span>茄子管家</span>
+        <span style="font-size:12px;font-weight:400;background:var(--purple-gradient);-webkit-background-clip:text;-webkit-text-fill-color:text;color:var(--text-muted);-webkit-text-fill-color:transparent;">个人工作台</span>
+      </div>
+      <div class="navbar-right">
+        <span class="navbar-date" id="navbarDate"></span>
+        <select class="navbar-btn" id="monthFilter" style="cursor:pointer;">
+          <!-- 动态生成 -->
+        </select>
+        <button class="navbar-btn" id="changePasswordBtn">修改密码</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="dashboard-grid">
+
+      <!-- Card: Today Overview -->
+      <div class="card card-colspan-2">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">📊</span>今日概览</span>
+          <button class="test-btn" data-api="overview">测试接口</button>
+        </div>
+        <div class="card-body">
+          <div class="weather-info" id="weatherInfo">
+            <div class="weather-icon" id="weatherIcon">🌤️</div>
+            <div class="weather-detail">
+              <div class="weather-temp" id="weatherTemp">--</div>
+              <div class="weather-desc" id="weatherDesc">加载中...</div>
+            </div>
+          </div>
+          <div class="overview-stats">
+            <div class="overview-stat">
+              <div class="value" id="overviewScheduleCount">--</div>
+              <div class="label">今日日程</div>
+            </div>
+            <div class="overview-stat">
+              <div class="value" id="overviewTaskCount">--</div>
+              <div class="label">待办任务</div>
+            </div>
+            <div class="overview-stat">
+              <div class="value" id="overviewHabitCount">--</div>
+              <div class="label">习惯进度</div>
+            </div>
+          </div>
+          <div class="test-result" id="overviewResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Today Question -->
+      <div class="card card-colspan-1">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">💭</span>今日一问</span>
+          <button class="test-btn" data-api="today-question">测试接口</button>
+        </div>
+        <div class="card-body">
+          <div class="question-box" id="questionBox">
+            <div class="question-text" id="questionText">加载中...</div>
+            <div class="question-hint" id="questionHint">每天一点思考</div>
+          </div>
+          <div class="test-result" id="todayQuestionResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Schedule -->
+      <div class="card card-colspan-1">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">📅</span>今日日程</span>
+          <button class="test-btn" data-api="schedule">测试接口</button>
+        </div>
+        <div class="card-body">
+          <div class="schedule-list" id="scheduleList">
+            <div class="empty-state">加载中...</div>
+          </div>
+          <div class="test-result" id="scheduleResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Finance -->
+      <div class="card card-colspan-2">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">💰</span>财务管理</span>
+          <button class="test-btn" data-api="finance">测试接口</button>
+        </div>
+        <div class="card-body">
+          <div class="finance-summary">
+            <div class="finance-item">
+              <div class="amount" id="financeTodayExpense">--</div>
+              <div class="label">今日支出</div>
+            </div>
+            <div class="finance-item">
+              <div class="amount" id="financeMonthlyTotal">--</div>
+              <div class="label">月度总计</div>
+            </div>
+            <div class="finance-item">
+              <div class="amount" id="financeDailyAvg">--</div>
+              <div class="label">日均支出</div>
+            </div>
+          </div>
+          <div class="budget-bar">
+            <div class="bar-label">
+              <span>预算进度</span>
+              <span id="budgetLabel">--</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" id="budgetFill" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="chart-container" style="margin-top:16px;height:220px;">
+            <canvas id="expensePieChart"></canvas>
+          </div>
+          <div class="test-result" id="financeResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Habit -->
+      <div class="card card-colspan-1">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">✅</span>习惯打卡</span>
+          <button class="test-btn" data-api="habit">测试接口</button>
+        </div>
+        <div class="card-body">
+          <div class="habit-list" id="habitList">
+            <div class="empty-state">加载中...</div>
+          </div>
+          <div class="test-result" id="habitResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Habit Streak -->
+      <div class="card card-colspan-1">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">🔥</span>连续打卡</span>
+          <button class="test-btn" data-api="habit-streak">测试接口</button>
+        </div>
+        <div class="card-body">
+          <div id="streakContent">
+            <div class="empty-state">加载中...</div>
+          </div>
+          <div class="test-result" id="habitStreakResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: News -->
+      <div class="card card-colspan-2">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">📰</span>新闻速览</span>
+          <button class="test-btn" data-api="news">测试接口</button>
+        </div>
+        <div class="card-body">
+          <div id="newsContent">
+            <div class="empty-state">加载中...</div>
+          </div>
+          <div class="test-result" id="newsResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Quick Actions -->
+      <div class="card card-colspan-1">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">⚡</span>快捷操作</span>
+        </div>
+        <div class="card-body">
+          <div class="quick-actions">
+            <button class="quick-action-btn" data-action="expense">
+              <span class="qa-icon">💸</span>
+              <span class="qa-label">记一笔</span>
+            </button>
+            <button class="quick-action-btn" data-action="checkin">
+              <span class="qa-icon">✅</span>
+              <span class="qa-label">打卡</span>
+            </button>
+            <button class="quick-action-btn" data-action="joy">
+              <span class="qa-icon">✨</span>
+              <span class="qa-label">小确幸</span>
+            </button>
+          </div>
+          <div class="test-result" id="actionResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Work Review -->
+      <div class="card card-colspan-2">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">📝</span>工作复盘</span>
+          <button class="test-btn" data-api="work-review">测试接口</button>
+        </div>
+        <div class="card-body">
+          <div class="review-content" id="reviewContent">
+            <div class="empty-state">加载中...</div>
+          </div>
+          <div class="test-result" id="workReviewResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Pet Care -->
+      <div class="card card-colspan-1">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">🐾</span>宠物护理</span>
+          <button class="test-btn" data-api="pet">测试接口</button>
+        </div>
+        <div class="card-body">
+          <div class="pet-list" id="petList">
+            <div class="empty-state">加载中...</div>
+          </div>
+          <div class="test-result" id="petResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Shopping List -->
+      <div class="card card-colspan-1">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">🛒</span>购物清单</span>
+          <button class="test-btn" data-api="shopping">测试接口</button>
+        </div>
+        <div class="card-body">
+          <div class="shopping-list" id="shoppingList">
+            <div class="empty-state">加载中...</div>
+          </div>
+          <div class="test-result" id="shoppingResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Reading Stats -->
+      <div class="card card-colspan-1">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">📚</span>阅读统计</span>
+          <button class="test-btn" data-api="reading">测试接口</button>
+        </div>
+        <div class="card-body">
+          <div class="reading-stats" id="readingStats">
+            <div class="empty-state" style="grid-column:1/-1;">加载中...</div>
+          </div>
+          <div class="test-result" id="readingResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Admin Overview -->
+      <div class="card card-colspan-1">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">⚙️</span>系统概览</span>
+          <button class="test-btn" data-api="admin">测试接口</button>
+        </div>
+        <div class="card-body">
+          <div id="adminContent">
+            <div class="empty-state">加载中...</div>
+          </div>
+          <div class="test-result" id="adminResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Habit Trend -->
+      <div class="card card-colspan-2">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">📈</span>习惯趋势</span>
+          <span style="font-size:12px;color:var(--text-muted);">近30天早起时间</span>
+        </div>
+        <div class="card-body">
+          <div class="chart-container" style="height:220px;">
+            <canvas id="habitLineChart"></canvas>
+          </div>
+          <div class="test-result" id="habitTrendResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Health Water -->
+      <div class="card card-colspan-1">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">💧</span>今日饮水</span>
+          <button class="test-btn" id="waterTestBtn">刷新</button>
+        </div>
+        <div class="card-body">
+          <div class="chart-container" style="height:180px;">
+            <canvas id="waterDoughnutChart"></canvas>
+          </div>
+          <div class="water-stats" style="text-align:center;margin-top:8px;">
+            <span style="font-size:13px;color:var(--text-muted);" id="waterStatsText">-- / -- ml</span>
+          </div>
+          <div class="test-result" id="waterResult"></div>
+        </div>
+      </div>
+
+      <!-- Card: Photo Skills -->
+      <div class="card card-colspan-1">
+        <div class="card-header">
+          <span class="card-title"><span class="emoji">📷</span>摄影技能</span>
+          <button class="test-btn" data-api="photo-progress">刷新</button>
+        </div>
+        <div class="card-body">
+          <div class="chart-container" style="height:180px;">
+            <canvas id="photoRadarChart"></canvas>
+          </div>
+          <div class="test-result" id="photoResult"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== Quick Expense FAB ===== -->
+<button class="fab-quick-expense" id="fabQuickExpense" title="快速记账">💸</button>
+
+<!-- ===== Template Modal ===== -->
+<div class="modal-overlay" id="templateModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>⚡ 快速记账</h3>
+      <button class="modal-close" id="modalCloseBtn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="template-grid" id="templateGrid">
+        <div class="loading-state">加载模板...</div>
+      </div>
+      <div class="modal-divider">或手动输入</div>
+      <div class="modal-input-group">
+        <input type="text" id="quickExpenseInput" placeholder="例如：午餐25餐饮微信 或 wu fan 25 can yin w" />
+        <button id="quickExpenseSubmit">记账</button>
+      </div>
+      <div class="modal-tips">
+        支持简写：w=微信, z=支付宝, h=花呗 | 支持语音转文字容错
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ===== Config =====
+  const STORAGE_KEY = 'eggplant_password';
+  const TOKEN_KEY = 'eggplant_token';
+
+  // ===== Token Management =====
+  function getPassword() {
+    return localStorage.getItem(STORAGE_KEY) || '';
+  }
+
+  function setPassword(pwd) {
+    localStorage.setItem(STORAGE_KEY, pwd);
+  }
+
+  function getToken() {
+    return localStorage.getItem(TOKEN_KEY) || '';
+  }
+
+  function setToken(token) {
+    localStorage.setItem(TOKEN_KEY, token);
+  }
+
+  // ===== API Client =====
+  async function apiCall(method, path, body) {
+    const token = getToken();
+    const password = getPassword();
+    const headers = {};
+    // 优先使用 token
+    if (token) {
+      headers['Authorization'] = 'Bearer ' + token;
+    } else if (password) {
+      // 兼容旧版密码
+      headers['x-access-password'] = password;
+    }
+    const options = { method, headers };
+    if (body !== undefined) {
+      headers['Content-Type'] = 'application/json';
+      options.body = JSON.stringify(body);
+    }
+    const response = await fetch(path, options);
+    // 如果 401，跳转登录
+    if (response.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+      throw new Error('Token已过期，请重新登录');
+    }
+    if (!response.ok) {
+      const text = await response.text();
+      let msg;
+      try {
+        const j = JSON.parse(text);
+        msg = j.message || j.error || text;
+      } catch(e) {
+        msg = text;
+      }
+      throw new Error('HTTP ' + response.status + ': ' + msg);
+    }
+    return response.json();
+  }
+
+  function apiGet(path) {
+    return apiCall('GET', path);
+  }
+
+  function apiPost(path, data) {
+    return apiCall('POST', path, data);
+  }
+
+  // ===== UI Helpers =====
+  function showResult(elementId, data, isError) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    let text;
+    if (isError) {
+      text = '[Error] ' + (data instanceof Error ? data.message : String(data));
+    } else {
+      try {
+        text = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+      } catch(e) {
+        text = String(data);
+      }
+    }
+    el.textContent = text;
+    el.className = 'test-result visible' + (isError ? ' error' : ' success');
+  }
+
+  function formatDate() {
+    const d = new Date();
+    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const w = weekdays[d.getDay()];
+    return y + ' 年 ' + m + ' 月 ' + day + ' 日 星期' + w;
+  }
+
+  // ===== Chart Instances =====
+  let expensePieChart = null;
+  let habitLineChart = null;
+  let waterDoughnutChart = null;
+  let photoRadarChart = null;
+
+  // ===== Month Filter =====
+  function initMonthFilter() {
+    const select = document.getElementById('monthFilter');
+    const now = new Date();
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = `${d.getFullYear()}年${d.getMonth() + 1}月`;
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = label;
+      select.appendChild(opt);
+    }
+    select.addEventListener('change', () => {
+      loadAllData();
+    });
+  }
+
+  function getSelectedMonth() {
+    const select = document.getElementById('monthFilter');
+    return select ? select.value : moment().format('YYYY-MM');
+  }
+
+  // ===== Chart Helpers =====
+  const chartColors = {
+    purple: ['#7c3aed', '#a855f7', '#c084fc', '#d8b4fe', '#e9d5ff', '#9333ea', '#6b21a8'],
+    accent: ['#f472b6', '#fb923c', '#facc15', '#4ade80', '#60a5fa', '#a78bfa', '#f87171']
+  };
+
+  function destroyChart(chart) {
+    if (chart) { chart.destroy(); }
+  }
+
+  // ===== Expense Pie Chart =====
+  function renderExpensePie(data) {
+    const ctx = document.getElementById('expensePieChart');
+    if (!ctx) return;
+    destroyChart(expensePieChart);
+
+    const categories = data.expenseByCategory || {};
+    const labels = Object.keys(categories);
+    const values = labels.map(k => categories[k].total);
+
+    if (labels.length === 0) {
+      // 无数据时直接返回，canvas 保持空白
+      return;
+    }
+
+    expensePieChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: chartColors.purple,
+          borderColor: 'transparent',
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: { color: '#c4b5fd', font: { size: 11 }, boxWidth: 12 }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const val = context.parsed;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                return `${context.label}: ¥${val.toFixed(1)} (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ===== Habit Line Chart (Wake-up times) =====
+  function renderHabitLine(data) {
+    const ctx = document.getElementById('habitLineChart');
+    if (!ctx) return;
+    destroyChart(habitLineChart);
+
+    // data 应为 habit streak 接口返回的数据，包含最近30天记录
+    // 这里我们先尝试从 habits API 获取，如果没有则显示空
+    const days = [];
+    const times = [];
+    // 若传入的数据中有 recentWakeUpData 则使用
+    if (data && data.recentWakeUpData) {
+      data.recentWakeUpData.forEach(d => {
+        days.push(d.date.slice(5));
+        times.push(d.minutes);
+      });
+    }
+
+    if (days.length === 0) {
+      // 显示无数据提示
+      return;
+    }
+
+    habitLineChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: days,
+        datasets: [{
+          label: '起床时间 (分)',
+          data: times,
+          borderColor: '#a855f7',
+          backgroundColor: 'rgba(168, 85, 247, 0.15)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+          pointBackgroundColor: '#c084fc'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            ticks: { color: '#8b7aaa', font: { size: 10 } },
+            grid: { color: 'rgba(59, 32, 96, 0.3)' }
+          },
+          y: {
+            ticks: { color: '#8b7aaa', font: { size: 10 } },
+            grid: { color: 'rgba(59, 32, 96, 0.3)' },
+            min: 300, // 5:00
+            max: 540, // 9:00
+            reverse: true
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const m = context.parsed.y;
+                const h = Math.floor(m / 60);
+                const min = m % 60;
+                return `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ===== Water Doughnut Chart =====
+  function renderWaterChart(data) {
+    const ctx = document.getElementById('waterDoughnutChart');
+    if (!ctx) return;
+    destroyChart(waterDoughnutChart);
+
+    const total = data.totalMl || 0;
+    const goal = data.goal || 2000;
+    const remaining = Math.max(0, goal - total);
+    const pct = goal > 0 ? Math.min(100, (total / goal * 100).toFixed(1)) : 0;
+
+    document.getElementById('waterStatsText').textContent = `${total} / ${goal} ml (${pct}%)`;
+
+    waterDoughnutChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['已饮水', '剩余'],
+        datasets: [{
+          data: [total, remaining],
+          backgroundColor: ['#60a5fa', 'rgba(59, 32, 96, 0.4)'],
+          borderColor: 'transparent',
+          cutout: '75%'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `${context.label}: ${context.parsed}ml`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ===== Photo Radar Chart =====
+  function renderPhotoRadar(data) {
+    const ctx = document.getElementById('photoRadarChart');
+    if (!ctx) return;
+    destroyChart(photoRadarChart);
+
+    const skills = data.skillAnalysis || {};
+    const labels = [];
+    const values = [];
+    Object.entries(skills).forEach(([key, item]) => {
+      labels.push(item.label || key);
+      values.push(item.level || 3);
+    });
+
+    if (labels.length === 0) {
+      labels.push('构图', '光线', '色彩', '故事性', '技术');
+      values.push(3, 3, 3, 3, 3);
+    }
+
+    photoRadarChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels,
+        datasets: [{
+          label: '技能评分',
+          data: values,
+          borderColor: '#a855f7',
+          backgroundColor: 'rgba(168, 85, 247, 0.2)',
+          pointBackgroundColor: '#c084fc',
+          pointBorderColor: '#fff',
+          pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            min: 0,
+            max: 5,
+            ticks: { display: false, stepSize: 1 },
+            grid: { color: 'rgba(59, 32, 96, 0.4)' },
+            pointLabels: { color: '#c4b5fd', font: { size: 11 } }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+
+  // ===== Template Modal =====
+  async function loadTemplates() {
+    const grid = document.getElementById('templateGrid');
+    try {
+      const res = await apiGet('/api/finance/templates');
+      const templates = res.templates || [];
+      if (templates.length === 0) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">暂无模板，可在后端添加</div>';
+        return;
+      }
+      grid.innerHTML = templates.map(t => {
+        const parsed = t.rawText || '';
+        return `<button class="template-btn" data-template-id="${t.id}">` +
+          `<span class="tpl-icon">${t.icon || '📝'}</span>` +
+          `<span class="tpl-name">${escapeHtml(t.name)}</span>` +
+          `<span class="tpl-desc">${escapeHtml(parsed)}</span>` +
+          `</button>`;
+      }).join('');
+
+      grid.querySelectorAll('.template-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-template-id');
+          try {
+            const data = await apiPost(`/api/finance/template/${id}/use`, {});
+            showResult('actionResult', data);
+            closeTemplateModal();
+            loadAllData();
+          } catch (e) {
+            showResult('actionResult', e, true);
+          }
+        });
+      });
+    } catch (e) {
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">加载模板失败</div>';
+    }
+  }
+
+  function openTemplateModal() {
+    document.getElementById('templateModal').classList.add('show');
+    loadTemplates();
+  }
+
+  function closeTemplateModal() {
+    document.getElementById('templateModal').classList.remove('show');
+  }
+
+  // ===== Load All Data =====
+  async function loadAllData() {
+    const selectedMonth = getSelectedMonth();
+    const monthNum = selectedMonth.split('-')[1];
+
+    // Load overview + weather
+    try {
+      const [weather, schedule, overview, habitToday, finance, budget, news, pet, shopping, reading, review, question, habitStreak, admin, waterToday, photoProgress] = await Promise.allSettled([
+        apiGet('/api/weather/today'),
+        apiGet('/api/schedule/today?mode=auto'),
+        apiGet('/api/admin/overview'),
+        apiGet('/api/habit/today'),
+        apiGet('/api/finance/summary?month=' + monthNum),
+        apiGet('/api/finance/budget?month=' + monthNum),
+        apiGet('/api/news/today'),
+        apiGet('/api/pet/reminder'),
+        apiGet('/api/inventory/shopping-list'),
+        apiGet('/api/reading/stats'),
+        apiGet('/api/work/daily-review'),
+        apiGet('/api/today-question'),
+        apiGet('/api/habit/streak'),
+        apiGet('/api/admin/overview'),
+        apiGet('/api/health/water/today'),
+        apiGet('/api/photo/progress'),
+      ]);
+
+      // Weather
+      if (weather.status === 'fulfilled') {
+        const w = weather.value;
+        document.getElementById('weatherIcon').textContent = w.icon || '🌤️';
+        document.getElementById('weatherTemp').textContent = (w.temp !== undefined) ? w.temp + '°C' : '--';
+        document.getElementById('weatherDesc').textContent = w.description || w.weather || '暂无数据';
+      } else {
+        document.getElementById('weatherDesc').textContent = '加载失败';
+      }
+
+      // Schedule
+      if (schedule.status === 'fulfilled') {
+        renderSchedule(schedule.value);
+      }
+
+      // Overview
+      if (overview.status === 'fulfilled') {
+        const o = overview.value;
+        document.getElementById('overviewScheduleCount').textContent = o.scheduleCount ?? o.schedule_count ?? o.todayScheduleCount ?? '--';
+        document.getElementById('overviewTaskCount').textContent = o.taskCount ?? o.task_count ?? o.todoCount ?? '--';
+        document.getElementById('overviewHabitCount').textContent = o.habitCount ?? o.habit_count ?? o.habitCompleted ?? '--';
+      }
+
+      // Habit Today
+      if (habitToday.status === 'fulfilled') {
+        renderHabits(habitToday.value);
+      }
+
+      // Habit Streak
+      if (habitStreak.status === 'fulfilled') {
+        renderStreak(habitStreak.value);
+      }
+
+      // Finance
+      if (finance.status === 'fulfilled') {
+        const f = finance.value;
+        document.getElementById('financeTodayExpense').textContent = f.todayExpense !== undefined ? '¥' + f.todayExpense : (f.today_expense !== undefined ? '¥' + f.today_expense : '--');
+        document.getElementById('financeMonthlyTotal').textContent = f.monthlyTotal !== undefined ? '¥' + f.monthlyTotal : (f.monthly_total !== undefined ? '¥' + f.monthly_total : '--');
+        document.getElementById('financeDailyAvg').textContent = f.dailyAvg !== undefined ? '¥' + f.dailyAvg : (f.daily_avg !== undefined ? '¥' + f.daily_avg : '--');
+      }
+
+      // Budget
+      if (budget.status === 'fulfilled') {
+        renderBudget(budget.value);
+      }
+
+      // News
+      if (news.status === 'fulfilled') {
+        renderNews(news.value);
+      }
+
+      // Pet
+      if (pet.status === 'fulfilled') {
+        renderPet(pet.value);
+      }
+
+      // Shopping
+      if (shopping.status === 'fulfilled') {
+        renderShopping(shopping.value);
+      }
+
+      // Reading
+      if (reading.status === 'fulfilled') {
+        renderReading(reading.value);
+      }
+
+      // Review
+      if (review.status === 'fulfilled') {
+        renderReview(review.value);
+      }
+
+      // Question
+      if (question.status === 'fulfilled') {
+        const q = question.value;
+        document.getElementById('questionText').textContent = q.question || q.text || q.title || '今天有什么想思考的？';
+        document.getElementById('questionHint').textContent = q.hint || q.note || q.remark || '每天一点思考';
+      }
+
+      // Admin
+      if (admin.status === 'fulfilled') {
+        renderAdmin(admin.value);
+      }
+
+      // Charts
+      if (finance.status === 'fulfilled') {
+        renderExpensePie(finance.value);
+      }
+      if (habitStreak.status === 'fulfilled') {
+        renderHabitLine(habitStreak.value);
+      }
+      if (waterToday.status === 'fulfilled') {
+        renderWaterChart(waterToday.value);
+      }
+      if (photoProgress.status === 'fulfilled') {
+        renderPhotoRadar(photoProgress.value);
+      }
+
+    } catch(e) {
+      console.error('loadAllData error', e);
+    }
+  }
+
+  // ===== Render Functions =====
+  function renderSchedule(data) {
+    const container = document.getElementById('scheduleList');
+    if (!data) {
+      container.innerHTML = '<div class="empty-state">暂无日程</div>';
+      return;
+    }
+    let items = data.items || data.schedule || data.events || [];
+    if (!Array.isArray(items)) items = [items];
+    if (items.length === 0) {
+      container.innerHTML = '<div class="empty-state">今日暂无日程</div>';
+      return;
+    }
+    container.innerHTML = items.slice(0, 6).map(item => {
+      const title = item.title || item.name || item.event || item.summary || '日程';
+      const time = item.time || item.startTime || item.start_time || item.start || '--:--';
+      const desc = item.description || item.desc || item.location || item.note || '';
+      return '<div class="schedule-item">' +
+        '<span class="schedule-time">' + escapeHtml(time) + '</span>' +
+        '<div class="schedule-info">' +
+        '<div class="schedule-title">' + escapeHtml(title) + '</div>' +
+        (desc ? '<div class="schedule-desc">' + escapeHtml(desc) + '</div>' : '') +
+        '</div></div>';
+    }).join('');
+  }
+
+  function renderHabits(data) {
+    const container = document.getElementById('habitList');
+    if (!data) {
+      container.innerHTML = '<div class="empty-state">暂无习惯数据</div>';
+      return;
+    }
+    let habits = data.items || data.habits || data.today || [];
+    if (!Array.isArray(habits)) {
+      if (typeof data === 'object') {
+        habits = Object.keys(data).map(k => ({ name: k, status: data[k], icon: '✅' }));
+      }
+    }
+    if (!Array.isArray(habits) || habits.length === 0) {
+      container.innerHTML = '<div class="empty-state">今日暂无打卡记录</div>';
+      return;
+    }
+    container.innerHTML = habits.map(h => {
+      const name = h.name || h.habit || h.title || '习惯';
+      const icon = h.icon || getHabitIcon(name);
+      const status = (h.status || h.done || h.completed || '').toString().toLowerCase();
+      let statusClass = 'pending';
+      let statusText = '未打卡';
+      if (status === 'done' || status === 'true' || status === '1' || status === 'completed') {
+        statusClass = 'done'; statusText = '已打卡';
+      } else if (status === 'missed' || status === 'false' || status === '0') {
+        statusClass = 'missed'; statusText = '未完成';
+      }
+      const streak = h.streak || h.days || '';
+      return '<div class="habit-item">' +
+        '<span class="habit-icon">' + icon + '</span>' +
+        '<div class="habit-info">' +
+        '<div class="habit-name">' + escapeHtml(name) + '</div>' +
+        (streak ? '<div class="habit-streak">连续 ' + streak + ' 天</div>' : '') +
+        '</div>' +
+        '<span class="habit-status ' + statusClass + '">' + statusText + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  function getHabitIcon(name) {
+    const n = name.toLowerCase();
+    if (n.includes('早起') || n.includes('起床')) return '🌅';
+    if (n.includes('健身') || n.includes('运动') || n.includes('跑步')) return '💪';
+    if (n.includes('睡觉') || n.includes('睡眠') || n.includes('早睡')) return '😴';
+    if (n.includes('阅读') || n.includes('读书') || n.includes('看书')) return '📖';
+    if (n.includes('冥想') || n.includes('静坐')) return '🧘';
+    if (n.includes('喝水') || n.includes('水')) return '💧';
+    if (n.includes('英语') || n.includes('背单词')) return '🔤';
+    return '✅';
+  }
+
+  function renderStreak(data) {
+    const container = document.getElementById('streakContent');
+    if (!data) {
+      container.innerHTML = '<div class="empty-state">暂无数据</div>';
+      return;
+    }
+    let streaks = data.items || data.streaks || data.habits || [];
+    if (!Array.isArray(streaks)) {
+      if (typeof data === 'object' && data.streak) {
+        container.innerHTML = '<div style="text-align:center;padding:16px;">' +
+          '<div style="font-size:48px;margin-bottom:8px;">🔥</div>' +
+          '<div style="font-size:28px;font-weight:700;color:var(--purple-300);">' + data.streak + ' 天</div>' +
+          '<div style="font-size:13px;color:var(--text-muted);margin-top:4px;">最长连续打卡</div></div>';
+        return;
+      }
+      streaks = [];
+    }
+    if (streaks.length === 0) {
+      container.innerHTML = '<div class="empty-state">暂无连续打卡数据</div>';
+      return;
+    }
+    container.innerHTML = streaks.map(s => {
+      const name = s.name || s.habit || s.title || '习惯';
+      const streak = s.streak || s.days || s.count || 0;
+      return '<div class="habit-item">' +
+        '<span class="habit-icon">🔥</span>' +
+        '<div class="habit-info">' +
+        '<div class="habit-name">' + escapeHtml(name) + '</div>' +
+        '<div class="habit-streak">连续 ' + streak + ' 天</div>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  function renderBudget(data) {
+    if (!data) return;
+    const used = data.used || data.spent || data.current || 0;
+    const total = data.total || data.budget || data.limit || 1;
+    const pct = total > 0 ? Math.min(100, Math.round((used / total) * 100)) : 0;
+    document.getElementById('budgetLabel').textContent = '¥' + used + ' / ¥' + total + ' (' + pct + '%)';
+    const fill = document.getElementById('budgetFill');
+    fill.style.width = pct + '%';
+    fill.className = 'bar-fill' + (pct >= 90 ? ' danger' : pct >= 70 ? ' warning' : '');
+  }
+
+  function renderNews(data) {
+    const container = document.getElementById('newsContent');
+    if (!data) {
+      container.innerHTML = '<div class="empty-state">暂无新闻</div>';
+      return;
+    }
+    let categories = data.categories || data.news || data.items || data.data || [];
+    if (!Array.isArray(categories)) {
+      if (typeof data === 'object') {
+        const keys = Object.keys(data);
+        categories = keys.map(k => ({ category: k, items: Array.isArray(data[k]) ? data[k] : [data[k]] }));
+      }
+    }
+    if (!Array.isArray(categories) || categories.length === 0) {
+      container.innerHTML = '<div class="empty-state">暂无新闻</div>';
+      return;
+    }
+    container.innerHTML = categories.map(cat => {
+      const catName = cat.category || cat.name || cat.title || '分类';
+      const items = cat.items || cat.articles || cat.news || [];
+      if (!Array.isArray(items)) return '';
+      return '<div class="news-category">' +
+        '<div class="news-category-title">' + escapeHtml(catName) + '</div>' +
+        items.slice(0, 3).map(item => {
+          const title = item.title || item.name || item.headline || '新闻';
+          const source = item.source || item.from || item.author || item.publisher || '';
+          return '<div class="news-item">' +
+            '<div class="news-title">' + escapeHtml(title) + '</div>' +
+            (source ? '<div class="news-source">' + escapeHtml(source) + '</div>' : '') +
+            '</div>';
+        }).join('') +
+        '</div>';
+    }).join('');
+  }
+
+  function renderPet(data) {
+    const container = document.getElementById('petList');
+    if (!data) {
+      container.innerHTML = '<div class="empty-state">暂无宠物提醒</div>';
+      return;
+    }
+    let pets = data.items || data.pets || data.reminders || [];
+    if (!Array.isArray(pets)) {
+      if (typeof data === 'object' && data.name) {
+        pets = [data];
+      }
+    }
+    if (!Array.isArray(pets) || pets.length === 0) {
+      container.innerHTML = '<div class="empty-state">暂无待办护理事项</div>';
+      return;
+    }
+    container.innerHTML = pets.map(p => {
+      const name = p.name || p.pet || p.petName || p.pet_name || '宠物';
+      const task = p.task || p.reminder || p.action || p.description || p.desc || '护理提醒';
+      const urgent = p.urgent || p.overdue || p.priority === 'high' || p.priority === 'urgent';
+      return '<div class="pet-item">' +
+        '<span class="pet-icon">🐾</span>' +
+        '<div class="pet-info">' +
+        '<div class="pet-name">' + escapeHtml(name) + '</div>' +
+        '<div class="pet-task">' + escapeHtml(task) + '</div>' +
+        '</div>' +
+        '<span class="' + (urgent ? 'pet-urgent' : 'pet-ok') + '">' + (urgent ? '紧急' : '正常') + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  function renderShopping(data) {
+    const container = document.getElementById('shoppingList');
+    if (!data) {
+      container.innerHTML = '<div class="empty-state">暂无购物清单</div>';
+      return;
+    }
+    let items = data.items || data.list || data.shoppingList || data.shopping_list || [];
+    if (!Array.isArray(items)) {
+      if (typeof data === 'object' && data.name) {
+        items = [data];
+      }
+    }
+    if (!Array.isArray(items) || items.length === 0) {
+      container.innerHTML = '<div class="empty-state">购物清单为空</div>';
+      return;
+    }
+    container.innerHTML = items.map(item => {
+      const name = item.name || item.title || item.item || '物品';
+      const qty = item.quantity || item.qty || item.count || '';
+      const priority = (item.priority || 'medium').toLowerCase();
+      return '<div class="shopping-item">' +
+        '<span class="shopping-name">' + escapeHtml(name) + '</span>' +
+        (qty ? '<span class="shopping-qty">x' + qty + '</span>' : '') +
+        '<span class="shopping-priority ' + priority + '">' + priority + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  function renderReading(data) {
+    const container = document.getElementById('readingStats');
+    if (!data) {
+      container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">暂无数据</div>';
+      return;
+    }
+    const fields = [
+      { key: 'booksRead', key2: 'books_read', key3: 'totalBooks', label: '本月读完' },
+      { key: 'pagesRead', key2: 'pages_read', key3: 'totalPages', label: '阅读页数' },
+      { key: 'readingDays', key2: 'reading_days', key3: 'days', label: '阅读天数' },
+      { key: 'minutesPerDay', key2: 'minutes_per_day', key3: 'avgMinutes', label: '日均分钟' },
+    ];
+    let html = '';
+    fields.forEach(f => {
+      const val = data[f.key] ?? data[f.key2] ?? data[f.key3] ?? '--';
+      html += '<div class="reading-stat">' +
+        '<div class="rs-value">' + val + '</div>' +
+        '<div class="rs-label">' + f.label + '</div></div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function renderReview(data) {
+    const container = document.getElementById('reviewContent');
+    if (!data) {
+      container.innerHTML = '<div class="empty-state">暂无复盘数据</div>';
+      return;
+    }
+    let html = '';
+    const sections = [
+      { key: 'summary', key2: 'todaySummary', key3: 'today_summary', key4: 'content', label: '今日总结' },
+      { key: 'achievements', key2: 'done', key3: 'completed', label: '完成事项' },
+      { key: 'challenges', key2: 'problems', key3: 'blockers', label: '遇到的问题' },
+      { key: 'plan', key2: 'tomorrow', key3: 'tomorrowPlan', key4: 'tomorrow_plan', label: '明日计划' },
+      { key: 'mood', key2: 'feeling', label: '今日心情' },
+    ];
+    sections.forEach(s => {
+      const val = data[s.key] || data[s.key2] || data[s.key3] || data[s.key4];
+      if (val) {
+        html += '<div class="review-section">' +
+          '<div class="rs-label">' + s.label + '</div>' +
+          '<div>' + escapeHtml(val) + '</div></div>';
+      }
+    });
+    if (!html) {
+      html = '<div class="empty-state">暂无复盘数据</div>';
+    }
+    container.innerHTML = html;
+  }
+
+  function renderAdmin(data) {
+    const container = document.getElementById('adminContent');
+    if (!data) {
+      container.innerHTML = '<div class="empty-state">暂无数据</div>';
+      return;
+    }
+    const fields = [
+      { key: 'version', key2: 'appVersion', key3: 'app_version', label: '版本' },
+      { key: 'uptime', key2: 'upTime', key3: 'runTime', label: '运行时间' },
+      { key: 'status', key2: 'serviceStatus', key3: 'service_status', label: '服务状态' },
+      { key: 'lastSync', key2: 'last_sync', key3: 'lastSyncTime', label: '最后同步' },
+    ];
+    let html = '';
+    fields.forEach(f => {
+      const val = data[f.key] || data[f.key2] || data[f.key3] || '--';
+      html += '<div class="reading-stat">' +
+        '<div class="rs-value" style="font-size:16px;">' + escapeHtml(String(val)) + '</div>' +
+        '<div class="rs-label">' + f.label + '</div></div>';
+    });
+    container.innerHTML = '<div class="reading-stats">' + html + '</div>';
+  }
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // ===== Test Button Handlers =====
+  const testBtnHandlers = {
+    'overview': async () => {
+      const data = await apiGet('/api/admin/overview');
+      showResult('overviewResult', data);
+    },
+    'today-question': async () => {
+      const data = await apiGet('/api/today-question');
+      showResult('todayQuestionResult', data);
+    },
+    'schedule': async () => {
+      const data = await apiGet('/api/schedule/today?mode=auto');
+      showResult('scheduleResult', data);
+    },
+    'finance': async () => {
+      const [summary, budget] = await Promise.all([
+        apiGet('/api/finance/summary'),
+        apiGet('/api/finance/budget'),
+      ]);
+      showResult('financeResult', { summary, budget });
+    },
+    'habit': async () => {
+      const data = await apiGet('/api/habit/today');
+      showResult('habitResult', data);
+    },
+    'habit-streak': async () => {
+      const data = await apiGet('/api/habit/streak');
+      showResult('habitStreakResult', data);
+    },
+    'news': async () => {
+      const data = await apiGet('/api/news/today');
+      showResult('newsResult', data);
+    },
+    'pet': async () => {
+      const data = await apiGet('/api/pet/reminder');
+      showResult('petResult', data);
+    },
+    'shopping': async () => {
+      const data = await apiGet('/api/inventory/shopping-list');
+      showResult('shoppingResult', data);
+    },
+    'reading': async () => {
+      const data = await apiGet('/api/reading/stats');
+      showResult('readingResult', data);
+    },
+    'work-review': async () => {
+      const data = await apiGet('/api/work/daily-review');
+      showResult('workReviewResult', data);
+    },
+    'admin': async () => {
+      const data = await apiGet('/api/admin/overview');
+      showResult('adminResult', data);
+    },
+  };
+
+  // ===== Quick Actions =====
+  const quickActionHandlers = {
+    'expense': async () => {
+      const rawText = prompt('请输入支出描述（如：午餐 28元）');
+      if (!rawText) return;
+      try {
+        const data = await apiPost('/api/finance/expense', { rawText });
+        showResult('actionResult', data);
+        loadAllData();
+      } catch(e) {
+        showResult('actionResult', e, true);
+      }
+    },
+    'checkin': async () => {
+      try {
+        const data = await apiPost('/api/habit/checkin', {});
+        showResult('actionResult', data);
+        loadAllData();
+      } catch(e) {
+        showResult('actionResult', e, true);
+      }
+    },
+    'joy': async () => {
+      const content = prompt('记录今天的小确幸：');
+      if (!content) return;
+      try {
+        const data = await apiPost('/api/joy/joy', { content });
+        showResult('actionResult', data);
+      } catch(e) {
+        showResult('actionResult', e, true);
+      }
+    },
+  };
+
+  // ===== Event Handlers =====
+  function init() {
+    // Set date
+    document.getElementById('navbarDate').textContent = formatDate();
+
+    // Init month filter
+    initMonthFilter();
+
+    // Password submit
+    document.getElementById('passwordSubmitBtn').addEventListener('click', handlePasswordSubmit);
+    document.getElementById('passwordInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') handlePasswordSubmit();
+    });
+
+    // Try auto-login
+    const savedPwd = getPassword();
+    if (savedPwd) {
+      document.getElementById('passwordInput').value = savedPwd;
+      handlePasswordSubmit();
+    } else {
+      document.getElementById('passwordInput').focus();
+    }
+
+    // Change password
+    document.getElementById('changePasswordBtn').addEventListener('click', function() {
+      const newPwd = prompt('请输入新密码（默认: eggplant2026）：');
+      if (newPwd) {
+        setPassword(newPwd);
+        alert('密码已修改，请刷新页面后使用新密码登录。');
+      }
+    });
+
+    // Test buttons
+    document.querySelectorAll('.test-btn[data-api]').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        const api = this.getAttribute('data-api');
+        const handler = testBtnHandlers[api];
+        if (!handler) return;
+        this.disabled = true;
+        this.textContent = '请求中...';
+        try {
+          await handler();
+        } catch(e) {
+          const resultId = api + 'Result';
+          showResult(resultId, e, true);
+        } finally {
+          this.disabled = false;
+          this.textContent = '测试接口';
+        }
+      });
+    });
+
+    // Quick action buttons
+    document.querySelectorAll('.quick-action-btn[data-action]').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        const action = this.getAttribute('data-action');
+        const handler = quickActionHandlers[action];
+        if (!handler) return;
+        try {
+          await handler();
+        } catch(e) {
+          showResult('actionResult', e, true);
+        }
+      });
+    });
+
+    // FAB quick expense
+    const fab = document.getElementById('fabQuickExpense');
+    if (fab) {
+      fab.addEventListener('click', openTemplateModal);
+    }
+
+    // Modal close
+    const modalClose = document.getElementById('modalCloseBtn');
+    if (modalClose) {
+      modalClose.addEventListener('click', closeTemplateModal);
+    }
+    const modalOverlay = document.getElementById('templateModal');
+    if (modalOverlay) {
+      modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) closeTemplateModal();
+      });
+    }
+
+    // Quick expense manual input
+    const quickSubmit = document.getElementById('quickExpenseSubmit');
+    const quickInput = document.getElementById('quickExpenseInput');
+    if (quickSubmit && quickInput) {
+      quickSubmit.addEventListener('click', async () => {
+        const rawText = quickInput.value.trim();
+        if (!rawText) return;
+        try {
+          const data = await apiPost('/api/finance/expense', { rawText });
+          showResult('actionResult', data);
+          quickInput.value = '';
+          closeTemplateModal();
+          loadAllData();
+        } catch (e) {
+          showResult('actionResult', e, true);
+        }
+      });
+      quickInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') quickSubmit.click();
+      });
+    }
+
+    // Water refresh button
+    const waterBtn = document.getElementById('waterTestBtn');
+    if (waterBtn) {
+      waterBtn.addEventListener('click', async () => {
+        try {
+          const data = await apiGet('/api/health/water/today');
+          renderWaterChart(data);
+        } catch (e) {
+          console.error('刷新饮水失败', e);
+        }
+      });
+    }
+  }
+
+  function handlePasswordSubmit() {
+    const input = document.getElementById('passwordInput');
+    const errorEl = document.getElementById('passwordError');
+    const pwd = input.value.trim();
+
+    if (!pwd) {
+      errorEl.textContent = '请输入密码';
+      return;
+    }
+
+    // 先尝试用密码换取 JWT token
+    setPassword(pwd);
+    fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.data && data.data.token) {
+        setToken(data.data.token);
+        document.getElementById('passwordOverlay').classList.add('hidden');
+        document.getElementById('appContainer').classList.add('visible');
+        loadAllData();
+      } else {
+        // 如果登录接口失败，尝试旧版方式直接调用
+        apiGet('/api/health')
+          .then(() => {
+            document.getElementById('passwordOverlay').classList.add('hidden');
+            document.getElementById('appContainer').classList.add('visible');
+            loadAllData();
+          })
+          .catch(() => {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(TOKEN_KEY);
+            errorEl.textContent = '密码错误，请重试';
+            input.value = '';
+            input.focus();
+          });
+      }
+    })
+    .catch(() => {
+      // 网络错误时 fallback 到旧版
+      apiGet('/api/health')
+        .then(() => {
+          document.getElementById('passwordOverlay').classList.add('hidden');
+          document.getElementById('appContainer').classList.add('visible');
+          loadAllData();
+        })
+        .catch(() => {
+          localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem(TOKEN_KEY);
+          errorEl.textContent = '连接失败，请检查网络';
+        });
+    });
+  }
+
+  // ===== Start =====
+  document.addEventListener('DOMContentLoaded', init);
+  // ===== PWA: Service Worker 注册 =====
+  async function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.register('/public/sw.js');
+        console.log('[PWA] Service Worker 注册成功:', registration.scope);
+
+        // 监听更新
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('[PWA] 发现新版本，请刷新页面更新');
+            }
+          });
+        });
+      } catch (err) {
+        console.warn('[PWA] Service Worker 注册失败:', err);
+      }
+    }
+  }
+
+  // ===== PWA: 安装提示 =====
+  let deferredPrompt = null;
+  const installBar = document.createElement('div');
+  installBar.id = 'pwaInstallBar';
+  installBar.className = 'pwa-install-bar';
+  installBar.innerHTML = `
+    <div class="pwa-install-info">
+      <div class="pwa-install-icon">🍆</div>
+      <div class="pwa-install-text">
+        <h4>添加到主屏幕</h4>
+        <p>将茄子管家添加到主屏幕，像App一样使用</p>
+      </div>
+    </div>
+    <div class="pwa-install-actions">
+      <button class="pwa-install-btn" id="pwaInstallBtn">安装</button>
+      <button class="pwa-install-close" id="pwaDismissBtn">&times;</button>
+    </div>
+  `;
+
+  function setupInstallPrompt() {
+    // 已经安装过了就不显示
+    if (window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true) {
+      return;
+    }
+
+    // 本地存储：用户已关闭提示，7天内不再显示
+    const dismissedAt = localStorage.getItem('pwa_dismissed_at');
+    if (dismissedAt) {
+      const days = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60 * 24);
+      if (days < 7) return;
+    }
+
+    // 监听 beforeinstallprompt 事件
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      showInstallBar();
+    });
+
+    // iOS Safari 不支持 beforeinstallprompt，检查是否是 iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS && !window.navigator.standalone) {
+      // iOS 用户：延迟显示手动安装提示
+      setTimeout(() => {
+        if (!deferredPrompt) {
+          const iosText = installBar.querySelector('.pwa-install-text p');
+          if (iosText) iosText.textContent = '点击 Safari 分享按钮，选择「添加到主屏幕」';
+          const btn = installBar.querySelector('#pwaInstallBtn');
+          if (btn) {
+            btn.textContent = '知道了';
+            btn.onclick = () => dismissInstallBar();
+          }
+          showInstallBar();
+        }
+      }, 3000);
+    }
+  }
+
+  function showInstallBar() {
+    if (!document.body.contains(installBar)) {
+      document.body.appendChild(installBar);
+    }
+    requestAnimationFrame(() => {
+      installBar.classList.add('show');
+    });
+
+    const installBtn = installBar.querySelector('#pwaInstallBtn');
+    const dismissBtn = installBar.querySelector('#pwaDismissBtn');
+
+    if (installBtn) {
+      installBtn.onclick = async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            console.log('[PWA] 用户接受了安装');
+          }
+          deferredPrompt = null;
+        }
+        dismissInstallBar();
+      };
+    }
+
+    if (dismissBtn) {
+      dismissBtn.onclick = dismissInstallBar;
+    }
+  }
+
+  function dismissInstallBar() {
+    installBar.classList.remove('show');
+    localStorage.setItem('pwa_dismissed_at', Date.now().toString());
+    setTimeout(() => {
+      if (installBar.parentNode) installBar.parentNode.removeChild(installBar);
+    }, 400);
+  }
+
+  // ===== 启动时执行 =====
+  registerServiceWorker();
+  setupInstallPrompt();
+})();
+</script>
+</body>
+</html>
