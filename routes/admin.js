@@ -29,7 +29,9 @@ function logAction(req, module, summary) {
     // 使用文件直写，避免递归触发
     const fs = require('fs');
     const path = require('path');
-    const dataPath = path.join(__dirname, '..', 'data', 'admin_logs.json');
+    const dataDir = process.env.RAILWAY_ENVIRONMENT ? '/tmp/data' : path.join(__dirname, '..', 'data');
+    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+    const dataPath = path.join(dataDir, 'admin_logs.json');
     let logs = [];
     try {
       const raw = fs.readFileSync(dataPath, 'utf-8');

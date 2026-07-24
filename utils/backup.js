@@ -3,7 +3,9 @@ const path = require('path');
 const schedule = require('node-schedule');
 const { execSync } = require('child_process');
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
+const DATA_DIR = process.env.RAILWAY_ENVIRONMENT
+  ? '/tmp/data'
+  : path.join(__dirname, '..', 'data');
 const BACKUP_DIR = path.join(__dirname, '..', 'backup');
 
 // 确保备份目录存在

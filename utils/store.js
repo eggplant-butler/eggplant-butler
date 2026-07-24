@@ -1,7 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
+// 数据目录：Railway 等云平台用 /tmp，本地用项目 data 目录
+const DATA_DIR = process.env.RAILWAY_ENVIRONMENT
+  ? '/tmp/data'
+  : path.join(__dirname, '..', 'data');
 
 // 确保数据目录存在
 if (!fs.existsSync(DATA_DIR)) {

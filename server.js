@@ -39,7 +39,12 @@ const authMiddlewareModule = require('./utils/auth');
 const authMiddleware = authMiddlewareModule.authMiddleware;
 const { authenticate } = authMiddlewareModule;
 const { logAction } = require('./routes/admin');
-const ngrok = require('ngrok');
+let ngrok;
+try {
+  ngrok = require('ngrok');
+} catch (e) {
+  ngrok = null;
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -198,7 +203,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('所有定时任务已启动');
   console.log('');
 
-  // 启动 ngrok 隧道（失败不影响主服务）
+  // 启动 ngrok 隧道（仅本地开发，失败不影响主服务）
   startNgrok();
 });
 
