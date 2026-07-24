@@ -201,6 +201,11 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 
 async function startNgrok() {
+  // Railway 等云平台自带域名，不需要 ngrok
+  if (process.env.RAILWAY_ENVIRONMENT || process.env.RENDER || process.env.VERCEL) {
+    return;
+  }
+
   const authtoken = process.env.NGROK_AUTHTOKEN;
 
   if (!authtoken) {
