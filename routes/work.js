@@ -393,4 +393,231 @@ router.get('/clients', (req, res) => {
   }
 });
 
+// ====== 技能评分（仅销售模式） ======
+
+// 工作技能评分
+router.post('/skill-score', (req, res) => {
+  try {
+    // 检查当前模式是否为 sales
+    const settings = store.getAll('settings');
+    const modeSetting = settings.find(s => s.key === 'work_mode');
+    const mode = modeSetting ? modeSetting.value : userConfig.currentWorkMode;
+
+    if (mode !== 'sales') {
+      return res.json(errorResponse('技能评分仅限销售模式下使用'));
+    }
+
+    const { date, skills, notes } = req.body;
+    const skillNames = ['icebreaking', 'needs_discovery', 'closing', 'follow_up', 'presentation', 'negotiation'];
+    const skillLabels = {
+      icebreaking: '破冰',
+      needs_discovery: '需求挖掘',
+      closing: '促单成交',
+      follow_up: '跟进维护',
+      presentation: '方案展示',
+      negotiation: '谈判议价'
+    };
+
+    if (!skills) {
+      return res.json(errorResponse('请提供技能评分数据'));
+    }
+
+    // 校验每个技能分数范围
+    for (const name of skillNames) {
+      if (skills[name] !== undefined) {
+        const score = parseInt(skills[name]);
+        if (isNaN(score) || score < 1 || score > 5) {
+          return res.json(errorResponse(`技能 ${skillLabels[name]} 的评分必须是1-5的整数`));
+        }
+      }
+    }
+
+    // 构建存储记录
+    const record = {
+      id: uuidv4(),
+      type: 'work_skill_score',
+      date: date || todayStr(),
+      time: nowTimeStr(),
+      skills: {},
+      notes: notes || '',
+      mode: 'sales',
+      createdAt: new Date().toISOString()
+    };
+
+    // 只存储提供的技能评分
+    for (const name of skillNames) {
+      if (skills[name] !== undefined) {
+        record.skills[name] = parseInt(skills[name]);
+      }
+    }
+
+    const result = store.create('work', record);
+    return res.json(successResponse(result, '技能评分已记录'));
+  } catch (err) {
+    return res.json(errorResponse('记录技能评分失败: ' + err.message));
+  }
+});
+
+// 技能趋势分析
+router.get('/skill-trend', (req, res) => {
+  try {
+    const now = moment();
+    const thirtyDaysAgo = now.clone().subtract(30, 'days').format('YYYY-MM-DD');
+
+    // 读取近30天的技能评分记录
+    const allWork = store.getAll('work');
+    const skillRecords = allWork.filter(r => {
+      return r.type === 'work_skill_score' && r.date >= thirtyDaysAgo;
+    }).sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+
+    const skillNames = ['icebreaking', 'needs_discovery', 'closing', 'follow_up', 'presentation', 'negotiation'];
+    const skillLabels = {
+      icebreaking: '破冰',
+      needs_discovery: '需求挖掘',
+      closing: '促单成交',
+      follow_up: '跟进维护',
+      presentation: '方案展示',
+      negotiation: '谈判议价'
+    };
+
+    if (skillRecords.length === 0) {
+      return res.json(successResponse({
+        skills: skillNames.map(name => ({
+          name,
+          label: skillLabels[name],
+          avgScore: 0,
+          trend: 'stable',
+          suggestion: '暂无数据，请先记录技能评分'
+        })),
+        overallTrend: 'stable',
+        overallAvg: 0,
+        recentScores: []
+      }));
+    }
+
+    // 计算每个技能的平均分和趋势
+    const skillsAnalysis = skillNames.map(name => {
+      const scores = skillRecords
+        .filter(r => r.skills && r.skills[name] !== undefined)
+        .map(r => r.skills[name]);
+
+      const avgScore = scores.length > 0
+        ? parseFloat((scores.reduce((s, v) => s + v, 0) / scores.length).toFixed(1))
+        : 0;
+
+      // 趋势判断：将最近评分分为前半和后半
+      let trend = 'stable';
+      if (scores.length >= 4) {
+        const mid = Math.floor(scores.length / 2);
+        const firstHalf = scores.slice(0, mid);
+        const secondHalf = scores.slice(mid);
+        const firstAvg = firstHalf.reduce((s, v) => s + v, 0) / firstHalf.length;
+        const secondAvg = secondHalf.reduce((s, v) => s + v, 0) / secondHalf.length;
+        const diff = secondAvg - firstAvg;
+
+        if (diff > 0.3) {
+          trend = 'up';
+        } else if (diff < -0.3) {
+          trend = 'down';
+        }
+      } else if (scores.length >= 2) {
+        const diff = scores[scores.length - 1] - scores[0];
+        if (diff >= 1) trend = 'up';
+        else if (diff <= -1) trend = 'down';
+      }
+
+      // 生成改进建议
+      const suggestions = [];
+      if (avgScore === 0) {
+        suggestions.push('暂无评分记录，建议持续记录');
+      } else if (avgScore < 2.5) {
+        suggestions.push(`${skillLabels[name]}能力偏弱，建议加强专项训练和角色扮演练习`);
+      } else if (avgScore < 3.5) {
+        suggestions.push(`${skillLabels[name]}处于中等水平，可通过刻意练习和复盘进一步提升`);
+      } else if (avgScore >= 4.5) {
+        suggestions.push(`${skillLabels[name]}表现优秀，可考虑总结经验分享给团队`);
+      }
+
+      if (trend === 'down') {
+        suggestions.push(`近期${skillLabels[name]}评分呈下降趋势，建议回顾最近的客户互动，找出不足之处`);
+      } else if (trend === 'up') {
+        suggestions.push(`${skillLabels[name]}评分持续上升，保持当前的学习节奏`);
+      }
+
+      return {
+        name,
+        label: skillLabels[name],
+        avgScore,
+        trend,
+        count: scores.length,
+        suggestion: suggestions.join('。') || '表现稳定，继续保持'
+      };
+    });
+
+    // 总体趋势
+    const allAvgs = skillsAnalysis.filter(s => s.count > 0).map(s => s.avgScore);
+    const overallAvg = allAvgs.length > 0
+      ? parseFloat((allAvgs.reduce((s, v) => s + v, 0) / allAvgs.length).toFixed(1))
+      : 0;
+
+    let overallTrend = 'stable';
+    if (skillRecords.length >= 4) {
+      const mid = Math.floor(skillRecords.length / 2);
+      const firstHalf = skillRecords.slice(0, mid);
+      const secondHalf = skillRecords.slice(mid);
+
+      const firstOverallAvg = firstHalf.reduce((sum, r) => {
+        const vals = Object.values(r.skills || {});
+        return sum + (vals.length > 0 ? vals.reduce((s, v) => s + v, 0) / vals.length : 0);
+      }, 0) / firstHalf.length;
+
+      const secondOverallAvg = secondHalf.reduce((sum, r) => {
+        const vals = Object.values(r.skills || {});
+        return sum + (vals.length > 0 ? vals.reduce((s, v) => s + v, 0) / vals.length : 0);
+      }, 0) / secondHalf.length;
+
+      if (secondOverallAvg - firstOverallAvg > 0.3) overallTrend = 'up';
+      else if (secondOverallAvg - firstOverallAvg < -0.3) overallTrend = 'down';
+    }
+
+    // 结合转化率估算收入影响
+    const recentClients = store.query('work', w => w.workType === 'client');
+    const totalClients = recentClients.length;
+    const dealClients = recentClients.filter(c => c.status === 'deal').length;
+    const conversionRate = totalClients > 0 ? (dealClients / totalClients * 100).toFixed(1) : null;
+
+    let revenueImpact = null;
+    if (conversionRate !== null && overallAvg > 0) {
+      // 简单估算：技能平均分每提升1分，转化率预计提升约5%
+      const estimatedRateIncrease = ((overallAvg / 5) * 5).toFixed(1);
+      revenueImpact = {
+        currentConversionRate: `${conversionRate}%`,
+        estimatedRatePerSkillPoint: '5%',
+        suggestion: overallAvg < 3.0
+          ? `当前转化率 ${conversionRate}%，技能评分有较大提升空间，提高技能评分有望显著提升转化率和收入`
+          : `当前转化率 ${conversionRate}%，技能水平良好，建议重点攻克短板技能以进一步突破`
+      };
+    }
+
+    // 最近评分记录
+    const recentScores = skillRecords.slice(-10).map(r => ({
+      id: r.id,
+      date: r.date,
+      skills: r.skills,
+      notes: r.notes || ''
+    }));
+
+    return res.json(successResponse({
+      skills: skillsAnalysis,
+      overallTrend,
+      overallAvg,
+      conversionRate: conversionRate !== null ? `${conversionRate}%` : null,
+      revenueImpact,
+      recentScores
+    }));
+  } catch (err) {
+    return res.json(errorResponse('获取技能趋势失败: ' + err.message));
+  }
+});
+
 module.exports = router;

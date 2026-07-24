@@ -339,4 +339,238 @@ router.post('/template/:id/use', (req, res) => {
   }
 });
 
+// 财务洞察与优化建议
+router.get('/insights', (req, res) => {
+  try {
+    const allRecords = store.getAll('finance');
+    const now = moment();
+
+    // 近6个月的月份列表
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      months.push(now.clone().subtract(i, 'months'));
+    }
+
+    // 按月组织支出和收入数据
+    const monthlyData = months.map(m => {
+      const monthStr = m.format('YYYY-MM');
+      const monthRecords = allRecords.filter(r => r.date && r.date.startsWith(monthStr));
+      const expenses = monthRecords.filter(r => r.type === 'expense');
+      const incomes = monthRecords.filter(r => r.type === 'income');
+
+      // 按分类汇总支出
+      const categoryTotals = {};
+      expenses.forEach(e => {
+        const cat = e.category || '其他';
+        categoryTotals[cat] = (categoryTotals[cat] || 0) + parseFloat(e.amount);
+      });
+
+      const totalExpense = expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+      const totalIncome = incomes.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+
+      // 收入分类汇总
+      const incomeCategoryTotals = {};
+      incomes.forEach(inc => {
+        const cat = inc.category || '工资';
+        incomeCategoryTotals[cat] = (incomeCategoryTotals[cat] || 0) + parseFloat(inc.amount);
+      });
+
+      return {
+        month: monthStr,
+        label: m.format('YYYY年MM月'),
+        totalExpense,
+        totalIncome,
+        expenseCount: expenses.length,
+        incomeCount: incomes.length,
+        categoryTotals,
+        incomeCategoryTotals
+      };
+    });
+
+    if (monthlyData.length === 0) {
+      return res.json(successResponse({
+        summary: '暂无近6个月的财务数据',
+        trends: [],
+        alerts: [],
+        suggestions: [],
+        monthlyComparison: []
+      }));
+    }
+
+    // 当前月、上月、上上月
+    const current = monthlyData[monthlyData.length - 1];
+    const lastMonth = monthlyData.length >= 2 ? monthlyData[monthlyData.length - 2] : null;
+    const twoMonthsAgo = monthlyData.length >= 3 ? monthlyData[monthlyData.length - 3] : null;
+
+    // ===== 消费结构趋势分析 =====
+    const allCategories = new Set();
+    monthlyData.forEach(md => Object.keys(md.categoryTotals).forEach(cat => allCategories.add(cat)));
+
+    const trends = [];
+    allCategories.forEach(cat => {
+      const categoryMonths = monthlyData.map(md => ({
+        month: md.month,
+        label: md.label,
+        amount: md.categoryTotals[cat] || 0,
+        ratio: md.totalExpense > 0 ? ((md.categoryTotals[cat] || 0) / md.totalExpense * 100).toFixed(1) : '0.0'
+      }));
+
+      // 计算趋势方向
+      const recentAmounts = categoryMonths.slice(-3).map(cm => cm.amount);
+      let direction = 'stable';
+      if (recentAmounts.length >= 2) {
+        const diff = recentAmounts[recentAmounts.length - 1] - recentAmounts[recentAmounts.length - 2];
+        if (diff > 0 && (recentAmounts[recentAmounts.length - 2] > 0 ? diff / recentAmounts[recentAmounts.length - 2] > 0.1 : true)) {
+          direction = 'up';
+        } else if (diff < 0 && (recentAmounts[recentAmounts.length - 2] > 0 ? Math.abs(diff) / recentAmounts[recentAmounts.length - 2] > 0.1 : true)) {
+          direction = 'down';
+        }
+      }
+
+      trends.push({
+        category: cat,
+        direction,
+        months: categoryMonths
+      });
+    });
+
+    // ===== 月度环比对比 =====
+    const monthlyComparison = monthlyData.map(md => {
+      const prevIdx = monthlyData.indexOf(md) - 1;
+      const prev = prevIdx >= 0 ? monthlyData[prevIdx] : null;
+
+      return {
+        month: md.month,
+        label: md.label,
+        totalExpense: md.totalExpense,
+        totalIncome: md.totalIncome,
+        balance: md.totalIncome - md.totalExpense,
+        expenseChange: prev ? parseFloat((md.totalExpense - prev.totalExpense).toFixed(2)) : null,
+        expenseChangeRatio: prev && prev.totalExpense > 0
+          ? parseFloat(((md.totalExpense - prev.totalExpense) / prev.totalExpense * 100).toFixed(1))
+          : null,
+        incomeChange: prev ? parseFloat((md.totalIncome - prev.totalIncome).toFixed(2)) : null,
+        incomeChangeRatio: prev && prev.totalIncome > 0
+          ? parseFloat(((md.totalIncome - prev.totalIncome) / prev.totalIncome * 100).toFixed(1))
+          : null
+      };
+    });
+
+    // ===== 生成预警 =====
+    const alerts = [];
+
+    // 宠物支出异常增加检测（环比 > 30%）
+    const petTrend = trends.find(t => t.category === '宠物');
+    if (petTrend && petTrend.months.length >= 2) {
+      const latestPet = petTrend.months[petTrend.months.length - 1].amount;
+      const prevPet = petTrend.months[petTrend.months.length - 2].amount;
+      if (prevPet > 0 && latestPet > prevPet * 1.3) {
+        const increase = ((latestPet - prevPet) / prevPet * 100).toFixed(1);
+        alerts.push({
+          type: 'pet_expense_spike',
+          level: 'warning',
+          message: `宠物支出本月 ${latestPet.toFixed(0)} 元，环比增长 ${increase}%，请检查是否有异常开支`
+        });
+      }
+    }
+
+    // 提成占比下降检测
+    if (current.incomeCategoryTotals && lastMonth && lastMonth.incomeCategoryTotals) {
+      const currentCommission = current.incomeCategoryTotals['提成'] || 0;
+      const lastCommission = lastMonth.incomeCategoryTotals['提成'] || 0;
+      const currentCommissionRatio = current.totalIncome > 0 ? currentCommission / current.totalIncome : 0;
+      const lastCommissionRatio = lastMonth.totalIncome > 0 ? lastCommission / lastMonth.totalIncome : 0;
+
+      if (lastCommissionRatio > 0.1 && currentCommissionRatio < lastCommissionRatio * 0.7) {
+        alerts.push({
+          type: 'commission_decline',
+          level: 'warning',
+          message: `提成收入占比从 ${(lastCommissionRatio * 100).toFixed(1)}% 下降到 ${(currentCommissionRatio * 100).toFixed(1)}%，请注意跟进业绩`
+        });
+      }
+    }
+
+    // 总支出连续增长预警
+    if (monthlyComparison.length >= 3) {
+      const last3 = monthlyComparison.slice(-3);
+      if (last3[0].expenseChangeRatio > 10 && last3[1].expenseChangeRatio > 10) {
+        alerts.push({
+          type: 'expense_rising',
+          level: 'caution',
+          message: '支出连续2个月环比增长超过10%，请注意控制开支'
+        });
+      }
+    }
+
+    // ===== 生成优化建议 =====
+    const suggestions = [];
+
+    // 餐饮超支检测（连续3月超支20%）
+    const foodTrend = trends.find(t => t.category === '餐饮');
+    if (foodTrend && foodTrend.months.length >= 3) {
+      const last3Food = foodTrend.months.slice(-3);
+      const avgFood = last3Food.reduce((s, m) => s + m.amount, 0) / 3;
+      const hasBudget = budgetConfig.categories['餐饮'];
+      if (hasBudget && avgFood > hasBudget.budget * 1.2) {
+        suggestions.push({
+          type: 'food_overspend',
+          message: `餐饮月均消费 ${avgFood.toFixed(0)} 元，超过预算 ${hasBudget.budget} 元的20%，建议自带午餐减少外卖`
+        });
+      }
+    }
+
+    // 交通费用优化
+    const transportTrend = trends.find(t => t.category === '交通');
+    if (transportTrend && transportTrend.months.length >= 2) {
+      const latestTransport = transportTrend.months[transportTrend.months.length - 1].amount;
+      const prevTransport = transportTrend.months[transportTrend.months.length - 2].amount;
+      if (latestTransport > prevTransport * 1.2 && prevTransport > 0) {
+        suggestions.push({
+          type: 'transport_optimize',
+          message: `交通费用本月 ${latestTransport.toFixed(0)} 元，环比增长显著，建议考虑公共交通或拼车`
+        });
+      }
+    }
+
+    // 储蓄建议
+    const avgBalance = monthlyData.slice(-3).reduce((s, md) => s + (md.totalIncome - md.totalExpense), 0) / Math.min(3, monthlyData.length);
+    if (avgBalance < 0) {
+      suggestions.push({
+        type: 'savings_warning',
+        message: `近3个月平均月结余为 ${avgBalance.toFixed(0)} 元，入不敷出，建议重新规划预算`
+      });
+    } else if (avgBalance > 0 && current.totalIncome > 0) {
+      const savingsRatio = avgBalance / current.totalIncome;
+      if (savingsRatio < 0.2) {
+        suggestions.push({
+          type: 'savings_low',
+          message: `近3个月储蓄率仅 ${(savingsRatio * 100).toFixed(1)}%，建议将目标储蓄率提升至20%以上`
+        });
+      }
+    }
+
+    // 生成总结
+    const totalExpenseChange = lastMonth ? current.totalExpense - lastMonth.totalExpense : 0;
+    const totalExpenseChangeRatio = lastMonth && lastMonth.totalExpense > 0
+      ? (totalExpenseChange / lastMonth.totalExpense * 100).toFixed(1)
+      : 0;
+
+    const summary = `本月总支出 ${current.totalExpense.toFixed(0)} 元` +
+      (lastMonth ? `，环比${totalExpenseChange >= 0 ? '增长' : '减少'} ${Math.abs(totalExpenseChangeRatio)}%` : '') +
+      `，收入 ${current.totalIncome.toFixed(0)} 元` +
+      `，结余 ${(current.totalIncome - current.totalExpense).toFixed(0)} 元。` +
+      (alerts.length > 0 ? ` 共 ${alerts.length} 条预警需要注意。` : ' 财务状况良好。');
+
+    return res.json(successResponse({
+      summary,
+      trends,
+      alerts,
+      suggestions,
+      monthlyComparison
+    }));
+  } catch (err) {
+    return res.json(errorResponse('获取财务洞察失败: ' + err.message));
+  }
+});
+
 module.exports = router;

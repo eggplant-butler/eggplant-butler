@@ -29,6 +29,7 @@ const adminModule = require('./routes/admin');
 const newsModule = require('./routes/news');
 const emotionRoute = require('./routes/emotion');
 const recipeModule = require('./routes/recipe');
+const settingsRoute = require('./routes/settings');
 
 // 导入工具
 const { startAllSchedulers } = require('./utils/notifier');
@@ -127,6 +128,7 @@ app.use('/api/admin', adminModule.router);
 app.use('/api/news', newsModule.router);
 app.use('/api/emotion', emotionRoute);
 app.use('/api/recipe', recipeModule.router);
+app.use('/api/settings', settingsRoute);
 
 // Notion Webhook 预留
 app.post('/api/notion/webhook', (req, res) => {
